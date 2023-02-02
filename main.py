@@ -8,8 +8,19 @@ root.title("Anmeldefenster")
 label1 = tk.Label(root, text="Herzlich willkommen")
 label1.pack()
 
-schaltf1 = tk.Button(root, text="aktion durchführen")
+
+def label1Aendern():
+ label1["text"] = "Aufwiedersehen"
+
+schaltf1 = tk.Button(root, text="Aktion durchführen", command=label1Aendern)
 schaltf1.pack()
+
+
+
+
+
+
+
 
 
 
