@@ -1,17 +1,21 @@
-import sqlite3 as db
+import sqlite3
 
 
 
 def databaseStartup():
-    connection = db.connect('database.db')
-    connection.execute('create table users (id integer primary key autoincrement, name str not null, password str not null);')
+    connection = sqlite3.connect('database.db')
+    cur = connection.cursor()
+    tables = cur.execute("SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='users'")
+    if tables == []:
+        connection.execute(
+            'create table users (id integer primary key autoincrement, name str not null, password str not null);')
     connection.commit()
     connection.close()
 
 
 
 def login(name, password) -> (bool, str):
-    connection = db.connect('database.db')
+    connection = sqlite3.connect('database.db')
     cursor = connection.execute("select * from users where name = '?'", (name,))
     users = cursor.fetchall()
     if len(users) != 1:
@@ -21,7 +25,7 @@ def login(name, password) -> (bool, str):
     return True, "Wilkommen {0}".format(name)
 
 def register(name, password) -> (bool, str):
-    connection = db.connect('database.db')
+    connection = sqlite3.connect('database.db')
     cursor = connection.execute('select * from users where name = ?', (name,))
     users = cursor.fetchall()
     if len(users) != 0:
@@ -30,7 +34,7 @@ def register(name, password) -> (bool, str):
     passwords = cursor.fetchall()
     if len(passwords)!=0:
         return False, 'password taken'
-    cursor = connection.execute("INSERT INTO users (name, password) VALUES ('?', '?')", (name, password))
+    cursor = connection.execute("INSERT INTO users (name, password) VALUES (?, ?)", (name, password))
     connection.commit()
     connection.close()
     return True, 'login erfolgreich'

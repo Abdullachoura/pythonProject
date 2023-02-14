@@ -13,3 +13,5 @@ print(boolvar, strvar)
 boolvar, strvar = database.register('thomas', '1')
 print(boolvar, strvar)
 
+
+
