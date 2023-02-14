@@ -5,7 +5,8 @@ import sqlite3
 def databaseStartup():
     connection = sqlite3.connect('database.db')
     cur = connection.cursor()
-    tables = cur.execute("SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='users'")
+    cur = cur.execute("SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='users'")
+    tables = cur.fetchall()
     if tables == []:
         connection.execute(
             'create table users (id integer primary key autoincrement, name str not null, password str not null);')
@@ -16,11 +17,11 @@ def databaseStartup():
 
 def login(name, password) -> (bool, str):
     connection = sqlite3.connect('database.db')
-    cursor = connection.execute("select * from users where name = '?'", (name,))
+    cursor = connection.execute("select * from users where name = ?", (name,))
     users = cursor.fetchall()
     if len(users) != 1:
         return False, ""
-    if users[2] != password:
+    if users[0][2] != password:
         return False, "Passwort ist falsch"
     return True, "Wilkommen {0}".format(name)
 
