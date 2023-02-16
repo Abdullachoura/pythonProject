@@ -67,6 +67,8 @@ class GraphWindow:
         try:
             scale = float(self.scaleVar.get())
             scale += 10
+            if scale == 0:
+                scale = 10
             self.ax.set_xlim(-1 * scale, scale)
             self.ax.set_ylim(-1 * scale, scale)
             self.canvas.draw()
@@ -80,6 +82,8 @@ class GraphWindow:
         try:
             scale = float(self.scaleVar.get())
             scale -= 10
+            if scale==0:
+                scale = -10
             self.ax.set_xlim(-1 * scale, scale)
             self.ax.set_ylim(-1 * scale, scale)
             self.canvas.draw()
@@ -91,6 +95,8 @@ class GraphWindow:
     def enter_scale(self, e):
         try:
             scale = float(self.scaleVar.get())
+            if scale == 0:
+                scale = 10
             self.ax.set_xlim(-1 * scale, scale)
             self.ax.set_ylim(-1 * scale, scale)
             self.canvas.draw()
