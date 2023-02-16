@@ -7,7 +7,6 @@ class LoginWindow:
     name: tk.StringVar
     password: tk.StringVar
     root: tk.Tk
-    msg: tk.Tk
 
     def __init__(self):
         self.root = tk.Tk()
@@ -56,6 +55,8 @@ class LoginWindow:
             title = 'Einloggen fehlgeschlagen'
 
         msgbox.showinfo(title, message)
+        self.root.destroy()
+
 
 
 

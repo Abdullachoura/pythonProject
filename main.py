@@ -1,10 +1,13 @@
 import tkinter as tk
 import loginWindow
 import database
+import graphWindow
+
+#graphWindow.GraphWindow()
+
 
 database.databaseStartup()
-
-loginWindow.LoginWindow()
+loginWin = loginWindow.LoginWindow()
 
 
 
@@ -27,18 +30,5 @@ schaltf1.pack()
 schaltf1 = tk.Button(root, text= "fenster schliessen")
 schaltf2 = tk.Button(root, text= "beenden", command=root.quit)
 schaltf2.pack()
-'''
-
-
-
-
-
-
-
-
-
-
-
-
-
 root.mainloop()
+'''
