@@ -7,11 +7,13 @@ class LoginWindow:
     name: tk.StringVar
     password: tk.StringVar
     root: tk.Tk
+    logged_in: bool
 
     def __init__(self):
         self.root = tk.Tk()
         self.name = tk.StringVar()
         self.password = tk.StringVar()
+        self.logged_in = False
         self.root.title = 'Login/Register'
         self.root.eval('tk::PlaceWindow . center')
 
@@ -51,6 +53,7 @@ class LoginWindow:
 
         if boolVar:
             title = 'Erfolgreich Eingelogt'
+            self.logged_in = True
         else:
             title = 'Einloggen fehlgeschlagen'
 

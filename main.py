@@ -3,11 +3,14 @@ import loginWindow
 import database
 import graphWindow
 
-#graphWindow.GraphWindow()
+
+
 
 
 database.databaseStartup()
 loginWin = loginWindow.LoginWindow()
+if (loginWin.logged_in == False): #remove == False
+    graphWindow.GraphWindow()
 
 
 

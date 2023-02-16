@@ -20,8 +20,8 @@ def login(name, password) -> (bool, str):
     cursor = connection.execute("select * from users where name = ?", (name,))
     users = cursor.fetchall()
     if len(users) != 1:
-        return False, ""
-    if users[0][2] != password:
+        return False, "Nutzername nicht gefunden"
+    if password != str(users[0][2]):
         return False, "Passwort ist falsch"
     return True, "Wilkommen {0}".format(name)
 
