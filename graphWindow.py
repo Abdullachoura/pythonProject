@@ -131,6 +131,7 @@ class GraphWindow:
         entry_lin_const = tk.Entry(lin, textvariable=lin_const)
         entry_lin_const.grid(column=2, row=1)
 
-        factor_0 =
+        factor_0 = self.convert_factor_entry(entry_lin_const.get())
+        factor_1 = self.convert_factor_entry()
 
         button_lin = tk.Button("eingabe", command= self.functionList.append(fun.Function()))
