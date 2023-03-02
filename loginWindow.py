@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.messagebox as msgbox
 import database as db
+import Regestierungsfenster as rf
 
 class LoginWindow:
 
@@ -38,6 +39,8 @@ class LoginWindow:
         self.root.mainloop()
 
     def register(self):
+        rf.Regestrierungsfenster()
+        '''
         boolVar, message = db.register(self.name.get(), self.password.get())
 
         if boolVar:
@@ -46,6 +49,7 @@ class LoginWindow:
             title = 'Registrierung fehlgeschlagen'
 
         msgbox.showinfo(title, message)
+        '''
 
 
     def login(self):
