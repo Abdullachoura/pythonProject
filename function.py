@@ -12,13 +12,13 @@ class Function:
         self.original = [args]
         for i in range(len(self.original)):
             if i == 0: continue
-            self.deriv_1= i * self.original[i]
+            self.deriv_1.append(i * self.original[i])
         for i in range(len(self.deriv_1)):
             if i == 0: continue
-            self.deriv_2 = i * self.deriv_1[i]
+            self.deriv_2.append(i * self.deriv_1[i])
         for i in range(len(self.deriv_2)):
             if i == 0: continue
-            self.deriv_3 = i * self.deriv_2[i]
+            self.deriv_3.append(i * self.deriv_2[i])
 
     def calc_original(self, x):
         to_return = 0
