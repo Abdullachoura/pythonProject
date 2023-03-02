@@ -1,7 +1,6 @@
 import tkinter
 import tkinter as tk
-from logging import exception
-
+import tkinter.menu
 import function as fun
 
 from matplotlib.backends.backend_tkagg import (
@@ -33,11 +32,14 @@ class GraphWindow:
         menubar = tk.Menu(root)
         root.config(menu=menubar)
         funktion_menu = tk.Menu(menubar)
-        funktion_menu.add_command(label='lineare Funktion')
-        funktion_menu.add_command(label='quadratische Funktion')
-        funktion_menu.add_command(label='ganzrationale Funktion')
+        funktion_menu.add_command(label='1', command=self.rational_function(1))
+        funktion_menu.add_command(label='2', command=self.rational_function(2))
+        funktion_menu.add_command(label='3', command=self.rational_function(3))
+        funktion_menu.add_command(label='4', command=self.rational_function(4))
+        funktion_menu.add_command(label='selbst definiert', command=self.rational_function(-1))
+        funktion_menu.add(itemType=tkinter.Menu)
         menubar.add_cascade(
-            label='Neue Funktion',
+            label='ganzrationale Funktion',
             menu=funktion_menu
         )
 
@@ -52,17 +54,17 @@ class GraphWindow:
         self.canvas.get_tk_widget().pack(fill='both', expand=1)
 
         frame_scale = tk.Frame(master=root)
-        frame_scale.pack(side="bottom", expand='x')
+        frame_scale.pack(side="bottom", fill='x')
 
         ent_scale = tk.Entry(frame_scale, textvariable=self.scaleVar)
         ent_scale.bind("<Return>", func=self.enter_scale)
-        ent_scale.pack(side="left")
+        ent_scale.pack(side="right")
 
         btn_increment_scale = tk.Button(frame_scale, text='+', command=self.increment_scale)
-        btn_increment_scale.pack(side="left")
+        btn_increment_scale.pack(side="right")
 
         btn_decrement_scale = tk.Button(frame_scale, text='-', command=self.decrement_scale)
-        btn_decrement_scale.pack(side="left")
+        btn_decrement_scale.pack(side="right")
 
         # listboxFunctions = tkinter.Listbox(root, listvariable=self.functionList, width=50)
         # listboxFunctions.pack(side="left", fill='y')
@@ -106,32 +108,24 @@ class GraphWindow:
         except:
             print("exception")
 
+    def rational_function(self, n):
+        if n==-1:
+            root = tk.Tk()
+            root.title('Funktionsgrad angabe')
 
-    def convert_factor_entry(self, factor: str) -> float:
-        if factor[0] == '+':
-            to_return = float(factor[1:])
-            return to_return
-        elif factor[0] == '-':
-            to_return = -1 * float(factor[1:])
-            return to_return
-        else:
-            raise ValueError("kein valides Vorzeichen")
+            text_var = tk.StringVar()
 
-    def linear_function(self):
-        lin = tk.Tk()
-        lin_factor = tk.StringVar()
-        lin_const = tk.StringVar()
+            label= tk.Label(root, text='gewünschter Funktionsgrad:')
+            label.pack(side='left')
 
-        entry_lin_factor = tk.Entry(lin, textvariable=lin_factor)
-        entry_lin_factor.grid(column=0, row=1)
+            entry = tk.Entry(root, textvariable=text_var)
+            entry.pack(side='left')
 
-        label_lin_var = tk.Label(lin, text="x")
-        label_lin_var.grid(column=1, row=1)
+            button = tk.Button(root, text='Eingeben', command=)
+            button.pack(side='left')
 
-        entry_lin_const = tk.Entry(lin, textvariable=lin_const)
-        entry_lin_const.grid(column=2, row=1)
+            root.mainloop()
 
-        factor_0 = self.convert_factor_entry(entry_lin_const.get())
-        factor_1 = self.convert_factor_entry()
 
-        button_lin = tk.Button("eingabe", command= self.functionList.append(fun.Function()))
+
+
