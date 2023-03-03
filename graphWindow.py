@@ -1,7 +1,7 @@
 import tkinter
 import tkinter as tk
-import tkinter.menu
 import function as fun
+import functionEntry as funent
 
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -32,12 +32,11 @@ class GraphWindow:
         menubar = tk.Menu(root)
         root.config(menu=menubar)
         funktion_menu = tk.Menu(menubar)
-        funktion_menu.add_command(label='1', command=self.rational_function(1))
-        funktion_menu.add_command(label='2', command=self.rational_function(2))
-        funktion_menu.add_command(label='3', command=self.rational_function(3))
-        funktion_menu.add_command(label='4', command=self.rational_function(4))
-        funktion_menu.add_command(label='selbst definiert', command=self.rational_function(-1))
-        funktion_menu.add(itemType=tkinter.Menu)
+        funktion_menu.add_command(label='1', command=lambda: self.rational_function(1))
+        funktion_menu.add_command(label='2', command=lambda: self.rational_function(2))
+        funktion_menu.add_command(label='3', command=lambda: self.rational_function(3))
+        funktion_menu.add_command(label='4', command=lambda: self.rational_function(4))
+        funktion_menu.add_command(label='selbst definiert', command=lambda: self.rational_function(-1))
         menubar.add_cascade(
             label='ganzrationale Funktion',
             menu=funktion_menu
@@ -109,7 +108,7 @@ class GraphWindow:
             print("exception")
 
     def rational_function(self, n):
-        if n==-1:
+        if n == -1:
             root = tk.Tk()
             root.title('Funktionsgrad angabe')
 
@@ -121,10 +120,18 @@ class GraphWindow:
             entry = tk.Entry(root, textvariable=text_var)
             entry.pack(side='left')
 
-            button = tk.Button(root, text='Eingeben', command=)
+            button = tk.Button(root, text='Eingeben', command=lambda: root.destroy())
             button.pack(side='left')
 
             root.mainloop()
+
+            fun_entry_win = funent.FunctionEntry(int(entry.get()))
+
+            self.functionList.append(fun_entry_win.func)
+        else:
+            fun_entry_win = funent.FunctionEntry(n)
+
+            self.functionList.append(fun_entry_win.func)
 
 
 

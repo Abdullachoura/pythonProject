@@ -7,7 +7,7 @@ def databaseStartup():
     cur = connection.cursor()
     cur = cur.execute("SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='users'")
     tables = cur.fetchall()
-    if tables == []:
+    if not tables:
         connection.execute(
             'create table users (id integer primary key autoincrement, name str not null, password str not null);')
     connection.commit()
@@ -19,6 +19,9 @@ def login(name, password) -> (bool, str):
     connection = sqlite3.connect('database.db')
     cursor = connection.execute("select * from users where name = ?", (name,))
     users = cursor.fetchall()
+    print(users)
+    print(len(users))
+    print(len(users) != 1)
     if len(users) != 1:
         return False, "Nutzername nicht gefunden"
     if password != str(users[0][2]):
@@ -29,11 +32,16 @@ def register(name, password) -> (bool, str):
     connection = sqlite3.connect('database.db')
     cursor = connection.execute('select * from users where name = ?', (name,))
     users = cursor.fetchall()
+    print(name)
+    print(users)
+    print(len(users))
     if len(users) != 0:
+        print('username taken')
         return False, 'username taken'
     cursor = connection.execute('select * from users where password = ?', (password,))
     passwords = cursor.fetchall()
     if len(passwords)!=0:
+        print('password taken')
         return False, 'password taken'
     cursor = connection.execute("INSERT INTO users (name, password) VALUES (?, ?)", (name, password))
     connection.commit()

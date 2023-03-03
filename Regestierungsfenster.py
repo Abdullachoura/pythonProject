@@ -13,13 +13,13 @@ class Regestrierungsfenster:
 
         username_label = tk.Label(self.root, text="Benutzername:")
         username_label.pack()
-        username_entry = tk.Entry(self.root, textvariable=self.username_var)
-        username_entry.pack()
+        self.username_entry = tk.Entry(self.root)
+        self.username_entry.pack()
 
         password_label = tk.Label(self.root, text="Passwort:")
         password_label.pack()
-        password_entry = tk.Entry(self.root, show="*", textvariable=self.password_var)
-        password_entry.pack()
+        self.password_entry = tk.Entry(self.root, show="*")
+        self.password_entry.pack()
 
         submit_button = tk.Button(self.root, text="Registrieren",
                                   command=self.registrieren)
@@ -28,7 +28,7 @@ class Regestrierungsfenster:
         self.root.mainloop()
 
     def registrieren(self):
-        db.register(self.username_var.get(), self.password_var.get())
+        db.register(self.username_entry.get(), self.password_entry.get())
         self.root.destroy()
 
 
