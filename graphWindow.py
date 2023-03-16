@@ -1,4 +1,4 @@
-import tkinter
+
 import tkinter as tk
 import function as fun
 import functionEntry as funent
@@ -23,14 +23,15 @@ class GraphWindow:
         self.offset_x = 0
         self.offset_y = 0
         self.functionList = []
-        root = tk.Tk()
+        self.root = tk.Tk()
         self.scaleVar = tk.StringVar()
         self.scaleVar.set("10")
+        self.funcListVar = tk.Variable(value=())
 
-        root.title('Functional')
+        self.root.title('Functional')
 
-        menubar = tk.Menu(root)
-        root.config(menu=menubar)
+        menubar = tk.Menu(self.root)
+        self.root.config(menu=menubar)
         funktion_menu = tk.Menu(menubar)
         funktion_menu.add_command(label='1', command=lambda: self.rational_function(1))
         funktion_menu.add_command(label='2', command=lambda: self.rational_function(2))
@@ -48,11 +49,18 @@ class GraphWindow:
         self.ax.set_ylim(-1 * self.scale + self.offset_y, self.scale + self.offset_y)
         self.ax.set_aspect('equal')
 
-        self.canvas = FigureCanvasTkAgg(self.fig, master=root)
-        self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill='both', expand=1)
+        funcFrame = tk.Frame(self.root)
+        funcFrame.pack(side="top")
 
-        frame_scale = tk.Frame(master=root)
+
+        self.canvas = FigureCanvasTkAgg(self.fig, master=funcFrame)
+        self.canvas.draw()
+        self.canvas.get_tk_widget().pack(fill='both', expand=1, side="right")
+
+        self.list_functions = tk.Listbox(funcFrame, listvariable=self.funcListVar)
+        self.list_functions.pack(side="left", fill="y")
+
+        frame_scale = tk.Frame(master=self.root)
         frame_scale.pack(side="bottom", fill='x')
 
         ent_scale = tk.Entry(frame_scale, textvariable=self.scaleVar)
@@ -65,12 +73,26 @@ class GraphWindow:
         btn_decrement_scale = tk.Button(frame_scale, text='-', command=self.decrement_scale)
         btn_decrement_scale.pack(side="right")
 
+
+
+
         # listboxFunctions = tkinter.Listbox(root, listvariable=self.functionList, width=50)
         # listboxFunctions.pack(side="left", fill='y')
 
-        root.mainloop()
+        self.root.mainloop()
 
-    def draw(self):
+
+    def update_list(self):
+        list = ()
+        funChar = int('h')
+        for fun in self.functionList:
+            list = list + (f"{chr(funChar)}()=" + fun.str())
+            funChar += 1
+        self.funcListVar.set(list)
+
+
+    def update_window(self):
+
         self.ax.set_xlim(-1 * self.scale + self.offset_x, self.scale + self.offset_x)
         self.ax.set_ylim(-1 * self.scale + self.offset_y, self.scale + self.offset_y)
         self.canvas.draw()
@@ -81,7 +103,7 @@ class GraphWindow:
             self.scale += 10
             if self.scale <= 0:
                 self.scale = 10
-            self.draw()
+            self.update_window()
             self.scaleVar.set(str(self.scale))
         except:
             print("exception")
@@ -92,7 +114,7 @@ class GraphWindow:
             self.scale -= 10
             if self.scale <= 0:
                 self.scale = 10
-            self.draw()
+            self.update_window()
             self.scaleVar.set(str(self.scale))
         except:
             print("exception")
@@ -102,10 +124,16 @@ class GraphWindow:
             self.scale = float(self.scaleVar.get())
             if self.scale == 0:
                 self.scale = 10
-            self.draw()
+            self.update_window()
             self.scaleVar.set(str(self.scale))
         except:
             print("exception")
+
+
+    def append_Function(self, fun):
+        print("append_Function")
+        self.functionList.append(fun)
+        self.update_window()
 
     def rational_function(self, n):
         if n == -1:
@@ -114,7 +142,7 @@ class GraphWindow:
 
             text_var = tk.StringVar()
 
-            label= tk.Label(root, text='gewünschter Funktionsgrad:')
+            label = tk.Label(root, text='gewünschter Funktionsgrad:')
             label.pack(side='left')
 
             entry = tk.Entry(root, textvariable=text_var)
@@ -126,13 +154,14 @@ class GraphWindow:
             root.mainloop()
 
             fun_entry_win = funent.FunctionEntry(int(entry.get()))
+            fun_entry_win.root.bind("<Destroy>", self.append_Function(fun_entry_win.func))
 
             self.functionList.append(fun_entry_win.func)
         else:
             fun_entry_win = funent.FunctionEntry(n)
 
+            fun_entry_win.root.bind("<Destroy>", self.append_Function(fun_entry_win.func))
             self.functionList.append(fun_entry_win.func)
-
 
 
 

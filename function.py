@@ -25,50 +25,47 @@ class Function:
             self.original.append(val)
 
         for i in range(len(self.original)):
-            print('deriv_1', i)
             if i == len(self.original)-1: continue
-            self.deriv_1.append(i+1 * self.original[i+1])
+            self.deriv_1.append(float(i+1) * self.original[i+1])
 
         for i in range(len(self.deriv_1)):
-            print('deriv_2', i)
             if i == len(self.deriv_1)-1: continue
-            self.deriv_2.append(i+1 * self.deriv_1[i+1])
+            self.deriv_2.append(float(i+1) * self.deriv_1[i+1])
 
         for i in range(len(self.deriv_2)):
-            print('deriv_3', i)
             if i == len(self.deriv_2)-1: continue
-            self.deriv_3.append(i+1 * self.deriv_2[i+1])
+            self.deriv_3.append(float(i+1) * self.deriv_2[i+1])
 
     def calc_original(self, x):
         to_return = 0
         for i in range(len(self.original)):
-            to_return += self.original[i]* x **i
+            to_return += self.original[i]* x ** float(i)
         return to_return
     def calc_deriv1(self, x):
         to_return = 0
         for i in range(len(self.deriv_1)):
-            to_return += self.deriv_1[i] * x **i
+            to_return += self.deriv_1[i] * x ** float(i)
         return to_return
 
     def calc_deriv2(self, x):
         to_return = 0
         for i in range(len(self.deriv_2)):
-            to_return += self.deriv_2[i] * x **i
+            to_return += self.deriv_2[i] * x ** float(i)
         return to_return
 
     def calc_deriv3(self, x):
         to_return = 0
         for i in range(len(self.deriv_3)):
-            to_return = self.deriv_3 * x **i
+            to_return = self.deriv_3 * x ** float(i)
         return to_return
 
     def calc_for_range(self, fun_type: FunctionType, min, max, inc):
         '''
         gibt ergebnisse als array zurück
-        :param fun: calc funktion von classe Funktion
-        :param min: untere grenze\n
-        :param max: obere grenze\n
-        :param inc: schritt größe\n
+        :param: fun: calc funktion von classe Funktion
+         min: untere grenze\n
+         max: obere grenze\n
+         inc: schritt größe\n
         :return: array der ergebnisse
         '''
         to_return_arr = []
@@ -96,6 +93,24 @@ class Function:
                 to_return.append(self.calc_deriv3(x))
         return to_return
 
+    def __str__(self):
+        toReturn = ""
+        for i in range(len(self.original)-1, -1, -1):
+            if i == 0:
+                if self.original[i] < 0:
+                    toReturn += f"-{self.original[i]}"
+                else:
+                    toReturn += f"+{self.original[i]}"
+                continue
+
+            if i == len(self.original)-1 and self.original[i] > 0:
+                toReturn += f"{self.original[i]}x^{i}"
+                continue
+
+            if self.original[i] < 0:
+                toReturn += f"-{self.original[i]}x^{i}"
+            else:
+                toReturn += f"+{self.original[i]}x^{i}"
 
 
 
