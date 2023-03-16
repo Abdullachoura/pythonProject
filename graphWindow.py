@@ -126,7 +126,6 @@ class GraphWindow:
             self.functionList.append(fun)
             self.update_window()
 
-
     def open_function_entry(self, term_type: fun.TermType, *args):
 
         fun_entry_win = funent.FunctionEntry(term_type, args[1])
