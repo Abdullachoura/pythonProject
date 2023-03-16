@@ -1,7 +1,8 @@
 import tkinter
 import tkinter as tk
 import tkinter.messagebox as msgbox
-from function import Function
+from Function import Function
+from Function import TermType
 
 
 class FunctionEntry:
@@ -9,32 +10,48 @@ class FunctionEntry:
     entry_arr : []
     func : Function
 
-    def __init__(self, grad):
+    def __init__(self, term_type, grad):
         self.root = tk.Tk()
         self.entry_arr = []
+        self.termType = term_type
 
         frame = tk.Frame(self.root)
         frame.pack(side='top')
 
         button = tk.Button(self.root, text='eingeben', command=self.enter_function)
         button.pack(side='bottom')
-
-        for i in range(grad+1):
-            if i==0:
+        if term_type == TermType.GANZ_RATIONAL:
+            for i in range(grad+1):
+                if i==0:
+                    text = tk.Entry(frame, width=5)
+                    text.pack(side='right')
+                    self.entry_arr.append(text)
+                    continue
+                if i==1:
+                    label_str = 'x'
+                else:
+                    label_str = 'x^{0}'.format(str(i))
+                label = tk.Label(frame, text=label_str)
+                label.pack(side='right')
                 text = tk.Entry(frame, width=5)
                 text.pack(side='right')
                 self.entry_arr.append(text)
-                continue
-            if i==1:
-                label_str = 'x'
-            else:
-                label_str = 'x^{0}'.format(str(i))
-            label = tk.Label(frame, text=label_str)
-            label.pack(side='right')
+        elif term_type == TermType.SCHNITTPUNKT:
             text = tk.Entry(frame, width=5)
-            text.pack(side='right')
+            text.pack(side='left')
             self.entry_arr.append(text)
-        self.root.mainloop()
+            label = tk.Label(frame, text="(x")
+            label.pack(side='left')
+            text = tk.Entry(frame, width=5)
+            text.pack(side='left')
+            self.entry_arr.append(text)
+            label = tk.Label(frame, text=")²")
+            label.pack(side='left')
+            text = tk.Entry(frame, width=5)
+            text.pack(side='left')
+            self.entry_arr.append(text)
+
+
 
     def convert_factor_entry(self, factor: str, sign_needed: bool) -> float:
         if len(factor) == 0:
@@ -62,8 +79,7 @@ class FunctionEntry:
                 else:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), True)
                 func_factors.append(factor)
-            self.func = Function(*func_factors)
-            print(self.func.original, self.func.deriv_1, self.func.deriv_2, self.func.deriv_3)
+            self.func = Function(self.termType, *func_factors)
             self.root.destroy()
         except ValueError as e:
             msgbox.showinfo('Falsche Eingabe', e.args[0])
