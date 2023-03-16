@@ -72,13 +72,6 @@ class GraphWindow:
 
         btn_decrement_scale = tk.Button(frame_scale, text='-', command=self.decrement_scale)
         btn_decrement_scale.pack(side="right")
-
-
-
-
-        # listboxFunctions = tkinter.Listbox(root, listvariable=self.functionList, width=50)
-        # listboxFunctions.pack(side="left", fill='y')
-
         self.root.mainloop()
 
 
