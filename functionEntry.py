@@ -52,6 +52,7 @@ class FunctionEntry:
             self.entry_arr.append(text)
 
 
+
     def convert_factor_entry(self, factor: str, sign_needed: bool) -> float:
         if len(factor) == 0:
             raise ValueError("Alle Eingabefelder sollten ausgefüllt sein")
