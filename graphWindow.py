@@ -75,9 +75,9 @@ class GraphWindow:
 
     def update_list(self):
         list = ()
-        funChar = ord('h')
+        funChar = ord('f')
         for fun in self.functionList:
-            list = list + (f"{chr(funChar)}()=" + str(fun),)
+            list = list + (f"{chr(funChar)}(x)=" + str(fun),)
             funChar += 1
         self.funcListVar.set(list)
 
@@ -127,11 +127,14 @@ class GraphWindow:
             self.update_window()
 
     def open_function_entry(self, term_type: fun.TermType, *args):
-        print(args)
-        fun_entry_win = funent.FunctionEntry(term_type, args[0])
+        fun_entry_win = funent.FunctionEntry(term_type, *args)
         fun_entry_win.root.bind("<Destroy>", lambda x: self.append_Function(fun_entry_win.func, fun_entry_win.root, x))
         fun_entry_win.root.mainloop()
         self.functionList.append(fun_entry_win.func)
+
+    def rational_function_button_event(self, root:tk.Tk,  termType:fun.TermType, *args):
+        root.destroy()
+        self.open_function_entry(termType, *args)
 
     def rational_function(self):
         root = tk.Tk()
@@ -141,11 +144,12 @@ class GraphWindow:
         label.pack(side='left')
         entry = tk.Entry(root, textvariable=text_var)
         entry.pack(side='left')
-        button = tk.Button(root, text='Eingeben', command= lambda: self.open_function_entry(fun.TermType.GANZ_RATIONAL, int(entry.get())))
+        button = tk.Button(root, text='Eingeben',
+                           command=lambda: self.rational_function_button_event(root,
+                                                                               fun.TermType.GANZ_RATIONAL,
+                                                                               int(entry.get())))
         button.pack(side='left')
-        print("dude")
         root.mainloop()
-        print("manloop over")
 
 
 

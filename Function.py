@@ -125,25 +125,24 @@ class GanzrationaleTerm:
     def __str__(self):
         toReturn = ""
         for i in range(len(self.original)-1, -1, -1):
-            print(i)
-            print(self.original)
             if i == 0:
-                print("i==0")
-                if int(self.original[i]) < 0:
-                    toReturn += f"-{self.original[i]}"
+                print(i, "i == 0")
+                if self.original[i] < 0:
+                    toReturn += f"{self.original[i]}"
                 else:
                     toReturn += f"+{self.original[i]}"
-                continue
-
-            if i == 0 and self.original[i] > 0:
-                toReturn += f"{self.original[i]}"
-                continue
-
-            if self.original[i] < 0:
-                toReturn += f"-{self.original[i]}x^{i}"
+            elif i == 1:
+                if len(self.original)-1 == i or self.original[i] < 0:
+                    toReturn += f"{self.original[i]}x"
+                else:
+                    toReturn += f"+{self.original[i]}x"
+            elif len(self.original)-1 == i:
+                toReturn += f"{self.original[i]}x^{i}"
+            elif self.original[i] < 0:
+                toReturn += f"{self.original[i]}x^{i}"
             else:
                 toReturn += f"+{self.original[i]}x^{i}"
-            return toReturn
+        return toReturn
 
 
 class SchnittpunktTerm:

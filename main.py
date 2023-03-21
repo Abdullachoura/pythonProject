@@ -30,7 +30,6 @@ button.pack()
 
 
 
-
 database.databaseStartup()
 loginWin = loginWindow.LoginWindow()
 if (loginWin.logged_in == False): #remove == False
