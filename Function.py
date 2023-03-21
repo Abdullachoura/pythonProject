@@ -16,9 +16,9 @@ class Function:
 
     def __init__(self, functype: TermType, *args):
         if functype == TermType.GANZ_RATIONAL:
-            self.term = GanzrationaleTerm(args)
+            self.term = GanzrationaleTerm(*args)
         elif functype == TermType.SCHNITTPUNKT:
-            self.term = SchnittpunktTerm(args)
+            self.term = SchnittpunktTerm(*args)
 
     def calc_original(self, x):
         return self.term.calc_original(x)
@@ -38,12 +38,14 @@ class Function:
         return self.term.arr_calc(x_arr, func_type)
 
     def __str__(self):
+        print(self.term)
         return str(self.term)
 
 
 
 class GanzrationaleTerm:
     def __init__(self, *args):
+        print("ganzrationale", args)
         self.original = []
         self.deriv_1 = []
         self.deriv_2 = []
@@ -123,21 +125,25 @@ class GanzrationaleTerm:
     def __str__(self):
         toReturn = ""
         for i in range(len(self.original)-1, -1, -1):
+            print(i)
+            print(self.original)
             if i == 0:
-                if self.original[i] < 0:
+                print("i==0")
+                if int(self.original[i]) < 0:
                     toReturn += f"-{self.original[i]}"
                 else:
                     toReturn += f"+{self.original[i]}"
                 continue
 
-            if i == len(self.original)-1 and self.original[i] > 0:
-                toReturn += f"{self.original[i]}x^{i}"
+            if i == 0 and self.original[i] > 0:
+                toReturn += f"{self.original[i]}"
                 continue
 
             if self.original[i] < 0:
                 toReturn += f"-{self.original[i]}x^{i}"
             else:
                 toReturn += f"+{self.original[i]}x^{i}"
+            return toReturn
 
 
 class SchnittpunktTerm:

@@ -70,6 +70,7 @@ class FunctionEntry:
         else:
             raise ValueError("Vorzeichen ungültig. + oder - an erster Stelle eingeben eingeben.")
 
+
     def enter_function(self):
         try:
             func_factors = []

@@ -75,9 +75,9 @@ class GraphWindow:
 
     def update_list(self):
         list = ()
-        funChar = int('h')
+        funChar = ord('h')
         for fun in self.functionList:
-            list = list + (f"{chr(funChar)}()=" + fun.str())
+            list = list + (f"{chr(funChar)}()=" + str(fun),)
             funChar += 1
         self.funcListVar.set(list)
 
@@ -127,8 +127,8 @@ class GraphWindow:
             self.update_window()
 
     def open_function_entry(self, term_type: fun.TermType, *args):
-
-        fun_entry_win = funent.FunctionEntry(term_type, args[1])
+        print(args)
+        fun_entry_win = funent.FunctionEntry(term_type, args[0])
         fun_entry_win.root.bind("<Destroy>", lambda x: self.append_Function(fun_entry_win.func, fun_entry_win.root, x))
         fun_entry_win.root.mainloop()
         self.functionList.append(fun_entry_win.func)
@@ -141,7 +141,7 @@ class GraphWindow:
         label.pack(side='left')
         entry = tk.Entry(root, textvariable=text_var)
         entry.pack(side='left')
-        button = tk.Button(root, text='Eingeben', command= lambda: self.open_function_entry(fun.TermType.GANZ_RATIONAL, entry.get()))
+        button = tk.Button(root, text='Eingeben', command= lambda: self.open_function_entry(fun.TermType.GANZ_RATIONAL, int(entry.get())))
         button.pack(side='left')
         print("dude")
         root.mainloop()
