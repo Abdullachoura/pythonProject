@@ -2,6 +2,7 @@ import tkinter as tk
 import loginWindow
 import database
 import graphWindow
+import Function as fun
 
 '''
 greeting = tk.Label(text="hello, mein friseur ist nice")
@@ -27,7 +28,6 @@ button = tk.Button(
 )
 button.pack()
 '''
-
 
 
 database.databaseStartup()

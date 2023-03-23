@@ -1,8 +1,10 @@
+import time
 import tkinter
 import tkinter as tk
 import tkinter.messagebox as msgbox
 from Function import Function
 from Function import TermType
+from Function import exponent_of
 
 
 class FunctionEntry:
@@ -30,7 +32,7 @@ class FunctionEntry:
                 if i==1:
                     label_str = 'x'
                 else:
-                    label_str = 'x^{0}'.format(str(i))
+                    label_str = f'x{exponent_of(i)}'
                 label = tk.Label(frame, text=label_str)
                 label.pack(side='right')
                 text = tk.Entry(frame, width=5)
@@ -83,6 +85,7 @@ class FunctionEntry:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), True)
                 func_factors.append(factor)
             self.func = Function(self.termType, *func_factors)
+            time.sleep(0.005)
             self.root.destroy()
         except ValueError as e:
             msgbox.showinfo('Falsche Eingabe', e.args[0])

@@ -12,6 +12,38 @@ class TermType(Enum):
     GANZ_RATIONAL = 1
     SCHNITTPUNKT = 2
 
+def exponent_of(i: int) -> str:
+    val = i
+    to_return = ""
+    while True:
+        if val == 0: break
+        exponent = val % 10
+        if exponent == 0:
+            to_return = chr(0x2070) + to_return
+        elif exponent == 1:
+            to_return = chr(0x00B9) + to_return
+        elif exponent == 2:
+            to_return = chr(0x00B2) + to_return
+        elif exponent == 3:
+            to_return = chr(0x00B3) + to_return
+        elif exponent == 4:
+            to_return = chr(0x2074) + to_return
+        elif exponent == 5:
+            to_return = chr(0x2075) + to_return
+        elif exponent == 6:
+            to_return = chr(0x2076) + to_return
+        elif exponent == 7:
+            to_return = chr(0x2077) + to_return
+        elif exponent == 8:
+            to_return = chr(0x2078) + to_return
+        elif exponent == 9:
+            to_return = chr(0x2079) + to_return
+        else:
+            raise ValueError("exponent not right value", exponent)
+        val = round(val / 10, 0)
+    return str(to_return)
+
+
 class Function:
 
     def __init__(self, functype: TermType, *args):
@@ -137,11 +169,11 @@ class GanzrationaleTerm:
                 else:
                     toReturn += f"+{self.original[i]}x"
             elif len(self.original)-1 == i:
-                toReturn += f"{self.original[i]}x^{i}"
+                toReturn += f"{self.original[i]}x{exponent_of(i)}"
             elif self.original[i] < 0:
-                toReturn += f"{self.original[i]}x^{i}"
+                toReturn += f"{self.original[i]}x^{exponent_of(i)}"
             else:
-                toReturn += f"+{self.original[i]}x^{i}"
+                toReturn += f"+{self.original[i]}x^{exponent_of(i)}"
         return toReturn
 
 
@@ -198,14 +230,17 @@ class SchnittpunktTerm:
         if self.original[1] < 0:
             toReturn += f"+ {self.original[1]})²"
         else:
-            toReturn += f"- {self.original[1]})²"
+            toReturn += f"{self.original[1]})²"
 
         if self.original[2] < 0:
-            toReturn += f"- {self.original[2]}"
+            toReturn += f"{self.original[2]}"
         else:
             toReturn += f"+ {self.original[2]}"
         return toReturn
 
 
-class TrigonomischerTerm:
-    
+'''class TrigonomischerTerm:
+
+    def __init__(self):
+        
+'''
