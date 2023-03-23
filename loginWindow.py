@@ -54,13 +54,11 @@ class LoginWindow:
 
     def login(self):
         boolVar, message = db.login(self.name.get(), self.password.get())
-
         if boolVar:
             title = 'Erfolgreich Eingelogt'
             self.logged_in = True
         else:
             title = 'Einloggen fehlgeschlagen'
-
         msgbox.showinfo(title, message)
         self.root.destroy()
 

@@ -206,3 +206,6 @@ class SchnittpunktTerm:
             toReturn += f"+ {self.original[2]}"
         return toReturn
 
+
+class TrigonomischerTerm:
+    

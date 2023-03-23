@@ -39,7 +39,7 @@ class GraphWindow:
         funktion_menu.add_command(label='selbst definierte Ganzrationale', command=lambda: self.rational_function())
         funktion_menu.add_command(label='Schnittpunktformel',
                                   command=lambda: self.open_function_entry(fun.TermType.SCHNITTPUNKT))
-        funktion_menu.add_command(label='')
+        funktion_menu.add_command(label='Trigonometrische')
         menubar.add_cascade(
             label='neue Funktion',
             menu=funktion_menu
@@ -58,8 +58,14 @@ class GraphWindow:
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=1, side="right")
 
-        self.list_functions = tk.Listbox(funcFrame, listvariable=self.funcListVar)
-        self.list_functions.pack(side="left", fill="y")
+        self.frame_list_info = tk.Frame(funcFrame)
+        self.frame_list_info.pack(side="left", fill='y')
+
+        self.list_functions = tk.Listbox(self.frame_list_info, listvariable=self.funcListVar)
+        self.list_functions.pack(side="top", fill="y")
+
+        self.frame_info = tk.Frame(self.frame_list_info)
+        self.frame_info.pack(side='bottom')
 
         frame_scale = tk.Frame(master=self.root)
         frame_scale.pack(side="bottom", fill='x')
