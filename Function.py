@@ -38,7 +38,6 @@ class Function:
         return self.term.arr_calc(x_arr, func_type)
 
     def __str__(self):
-        print(self.term)
         return str(self.term)
 
 
@@ -70,6 +69,7 @@ class GanzrationaleTerm:
         for i in range(len(self.original)):
             to_return += self.original[i]* x ** float(i)
         return to_return
+
     def calc_deriv1(self, x):
         to_return = 0
         for i in range(len(self.deriv_1)):

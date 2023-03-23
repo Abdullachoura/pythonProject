@@ -10,7 +10,7 @@ class FunctionEntry:
     entry_arr : []
     func : Function
 
-    def __init__(self, term_type, grad):
+    def __init__(self, term_type, *args):
         self.root = tk.Tk()
         self.entry_arr = []
         self.termType = term_type
@@ -21,7 +21,7 @@ class FunctionEntry:
         button = tk.Button(self.root, text='eingeben', command=self.enter_function)
         button.pack(side='bottom')
         if term_type == TermType.GANZ_RATIONAL:
-            for i in range(grad+1):
+            for i in range(args[0]+1):
                 if i==0:
                     text = tk.Entry(frame, width=5)
                     text.pack(side='right')
@@ -75,7 +75,9 @@ class FunctionEntry:
         try:
             func_factors = []
             for i in range(len(self.entry_arr)):
-                if i == len(self.entry_arr)-1:
+                if i == len(self.entry_arr)-1 and self.termType.GANZ_RATIONAL:
+                    factor = self.convert_factor_entry(self.entry_arr[i].get(), False)
+                elif i == 0 and self.termType.SCHNITTPUNKT:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), False)
                 else:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), True)

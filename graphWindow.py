@@ -1,5 +1,8 @@
 
 import tkinter as tk
+
+import matplotlib.axes
+
 import Function as fun
 import functionEntry as funent
 
@@ -34,13 +37,13 @@ class GraphWindow:
         self.root.config(menu=menubar)
         funktion_menu = tk.Menu(menubar)
         funktion_menu.add_command(label='selbst definierte Ganzrationale', command=lambda: self.rational_function())
-        funktion_menu.add_command(label='Schnittpunktformel')
+        funktion_menu.add_command(label='Schnittpunktformel',
+                                  command=lambda: self.open_function_entry(fun.TermType.SCHNITTPUNKT))
         funktion_menu.add_command(label='')
         menubar.add_cascade(
             label='neue Funktion',
             menu=funktion_menu
         )
-
         self.fig, self.ax = plt.subplots(1, 1)
         self.ax.grid(True)
         self.ax.set_xlim(-1 * self.scale + self.offset_x, self.scale + self.offset_x)
@@ -81,12 +84,26 @@ class GraphWindow:
             funChar += 1
         self.funcListVar.set(list)
 
+    def update_canvas(self):
+        graphMinX = -1 * self.scale + self.offset_x
+        graphMaxX = self.scale + self.offset_x
+        graphMinY = -1 * self.scale + self.offset_y
+        graphMaxY = self.scale + self.offset_y
+        self.ax.clear()
+        self.ax.grid(True)
+        self.ax.set_xlim(graphMinX, graphMaxX)
+        self.ax.set_ylim(graphMinY, graphMaxY)
+        x_vals = np.linspace(graphMinX, graphMaxX)
+        for function in self.functionList:
+            y_vals = function.arr_calc(x_vals, fun.FunctionDerivative.ORIGINAL)
+            self.ax.plot(x_vals, y_vals)
+        self.canvas.draw()
+
 
     def update_window(self):
         self.update_list()
-        self.ax.set_xlim(-1 * self.scale + self.offset_x, self.scale + self.offset_x)
-        self.ax.set_ylim(-1 * self.scale + self.offset_y, self.scale + self.offset_y)
-        self.canvas.draw()
+        self.update_canvas()
+
 
     def increment_scale(self):
         try:
@@ -150,6 +167,5 @@ class GraphWindow:
                                                                                int(entry.get())))
         button.pack(side='left')
         root.mainloop()
-
 
 
