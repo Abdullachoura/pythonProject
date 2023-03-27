@@ -1,6 +1,5 @@
 from enum import Enum
-
-import numpy
+import numpy as np
 
 class FunctionDerivative(Enum):
     ORIGINAL=1
@@ -11,6 +10,12 @@ class FunctionDerivative(Enum):
 class TermType(Enum):
     GANZ_RATIONAL = 1
     SCHNITTPUNKT = 2
+    TRIGONOMETRISCH = 3
+
+class TrigonometrischerOperator:
+    COS = 1
+    SIN = 2
+
 
 def exponent_of(i: int) -> str:
     val = i
@@ -51,6 +56,8 @@ class Function:
             self.term = GanzrationaleTerm(*args)
         elif functype == TermType.SCHNITTPUNKT:
             self.term = SchnittpunktTerm(*args)
+        elif functype == TermType.TRIGONOMETRISCH:
+            self.term = TrigonomischerTerm(args[0], *args[1:])
 
     def calc_original(self, x):
         return self.term.calc_original(x)
@@ -158,9 +165,8 @@ class GanzrationaleTerm:
         toReturn = ""
         for i in range(len(self.original)-1, -1, -1):
             if i == 0:
-                print(i, "i == 0")
                 if self.original[i] < 0:
-                    toReturn += f"{self.original[i]}"
+                    toReturn += f"-{abs(self.original[i])}"
                 else:
                     toReturn += f"+{self.original[i]}"
             elif i == 1:
@@ -171,7 +177,7 @@ class GanzrationaleTerm:
             elif len(self.original)-1 == i:
                 toReturn += f"{self.original[i]}x{exponent_of(i)}"
             elif self.original[i] < 0:
-                toReturn += f"{self.original[i]}x^{exponent_of(i)}"
+                toReturn += f"-{abs(self.original[i])}x^{exponent_of(i)}"
             else:
                 toReturn += f"+{self.original[i]}x^{exponent_of(i)}"
         return toReturn
@@ -228,19 +234,76 @@ class SchnittpunktTerm:
     def __str__(self):
         toReturn = f"{self.original[0]}(x "
         if self.original[1] < 0:
-            toReturn += f"+ {self.original[1]})²"
+            toReturn += f"-{abs(self.original[1])})²"
         else:
-            toReturn += f"{self.original[1]})²"
+            toReturn += f"+{self.original[1]})²"
 
         if self.original[2] < 0:
-            toReturn += f"{self.original[2]}"
+            toReturn += f"-{abs(self.original[2])}"
         else:
-            toReturn += f"+ {self.original[2]}"
+            toReturn += f"+{self.original[2]}"
         return toReturn
 
 
-'''class TrigonomischerTerm:
+class TrigonomischerTerm:
 
-    def __init__(self):
-        
-'''
+    def __init__(self, trigop : TrigonometrischerOperator, *args):
+        self.trigOp = trigop
+        self.original = []
+        for val in args:
+            self.original.append(val)
+
+
+    def calc_original(self, x):
+        to_return = 0
+        if self.trigOp == TrigonometrischerOperator.SIN:
+            to_return = self.original[0] * np.sin((np.pi * 2) / self.original[2] + self.original[1])
+        return to_return
+
+    def calc_deriv1(self, x):
+        return self.deriv1[0] * x + self.deriv1[1]
+
+    def calc_deriv2(self, x):
+        return self.deriv2[0] * x
+
+    def calc_deriv3(self, x):
+        return 0
+
+    def calc_for_range(self, functionDeriv: FunctionDerivative, start, end, inc):
+        to_return = []
+        for x in range(start, end, inc):
+            if functionDeriv == FunctionDerivative.ORIGINAL:
+                to_return.append(self.calc_original(x))
+            elif functionDeriv == FunctionDerivative.DERIVATIVE_1:
+                to_return.append(self.calc_deriv1(x))
+            elif functionDeriv == FunctionDerivative.DERIVATIVE_2:
+                to_return.append(self.calc_deriv2(x))
+            elif functionDeriv == FunctionDerivative.DERIVATIVE_3:
+                to_return.append(self.calc_deriv3(x))
+        return to_return
+
+    def arr_calc(self, x_arr, func_type : FunctionDerivative):
+        to_return = []
+        for x in x_arr:
+            if func_type == FunctionDerivative.ORIGINAL:
+                to_return.append(self.calc_original(x))
+            elif func_type == FunctionDerivative.DERIVATIVE_1:
+                to_return.append(self.calc_deriv1(x))
+            elif func_type == FunctionDerivative.DERIVATIVE_2:
+                to_return.append(self.calc_deriv2(x))
+            elif func_type == FunctionDerivative.DERIVATIVE_3:
+                to_return.append(self.calc_deriv3(x))
+        return to_return
+
+    def __str__(self):
+        toReturn = f"{self.original[0]}(x "
+        if self.original[1] < 0:
+            toReturn += f"-{abs(self.original[1])})²"
+        else:
+            toReturn += f"+{self.original[1]})²"
+
+        if self.original[2] < 0:
+            toReturn += f"-{abs(self.original[2])}"
+        else:
+            toReturn += f"+{self.original[2]}"
+        return toReturn

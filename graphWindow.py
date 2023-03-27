@@ -39,19 +39,28 @@ class GraphWindow:
         funktion_menu.add_command(label='selbst definierte Ganzrationale', command=lambda: self.rational_function())
         funktion_menu.add_command(label='Schnittpunktformel',
                                   command=lambda: self.open_function_entry(fun.TermType.SCHNITTPUNKT))
-        funktion_menu.add_command(label='Trigonometrische')
+        funktion_menu.add_command(label='Trigonometrische',
+                                  command=lambda: self.open_function_entry(fun.TermType.TRIGONOMETRISCH))
         menubar.add_cascade(
             label='neue Funktion',
             menu=funktion_menu
         )
         self.fig, self.ax = plt.subplots(1, 1)
-        self.ax.grid(True)
+        self.ax.grid(True, color='grey')
+        self.ax.spines['left'].set_position('center')
+        self.ax.spines['bottom'].set_position('center')
+        self.ax.spines['right'].set_color('none')
+        self.ax.spines['top'].set_color('none')
+        self.ax.patch.set_edgecolor('grey')
+        self.ax.patch.set_linewidth(1)
         self.ax.set_xlim(-1 * self.scale + self.offset_x, self.scale + self.offset_x)
         self.ax.set_ylim(-1 * self.scale + self.offset_y, self.scale + self.offset_y)
         self.ax.set_aspect('equal')
+        yticklabels = self.ax.yaxis.get_major_ticks()
+        yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
 
         funcFrame = tk.Frame(self.root)
-        funcFrame.pack(side="top")
+        funcFrame.pack(side="top", fill='both', expand=1)
 
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=funcFrame)
@@ -96,10 +105,18 @@ class GraphWindow:
         graphMinY = -1 * self.scale + self.offset_y
         graphMaxY = self.scale + self.offset_y
         self.ax.clear()
-        self.ax.grid(True)
+        self.ax.grid(True, color='grey')
+        self.ax.spines['left'].set_position('center')
+        self.ax.spines['bottom'].set_position('center')
+        self.ax.spines['right'].set_color('none')
+        self.ax.spines['top'].set_color('none')
+        self.ax.patch.set_edgecolor('grey')
+        self.ax.patch.set_linewidth(1)
         self.ax.set_xlim(graphMinX, graphMaxX)
         self.ax.set_ylim(graphMinY, graphMaxY)
-        x_vals = np.linspace(graphMinX, graphMaxX)
+        yticklabels = self.ax.yaxis.get_major_ticks()
+        yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
+        x_vals = np.linspace(graphMinX, graphMaxX, num=100)
         for function in self.functionList:
             y_vals = function.arr_calc(x_vals, fun.FunctionDerivative.ORIGINAL)
             self.ax.plot(x_vals, y_vals)
@@ -119,8 +136,8 @@ class GraphWindow:
                 self.scale = 10
             self.update_window()
             self.scaleVar.set(str(self.scale))
-        except:
-            print("exception")
+        except Exception as e:
+            print(e.args)
 
     def decrement_scale(self):
         try:
@@ -130,8 +147,8 @@ class GraphWindow:
                 self.scale = 10
             self.update_window()
             self.scaleVar.set(str(self.scale))
-        except:
-            print("exception")
+        except Exception as e:
+            print(e.args)
 
     def enter_scale(self, e):
         try:
@@ -140,8 +157,8 @@ class GraphWindow:
                 self.scale = 10
             self.update_window()
             self.scaleVar.set(str(self.scale))
-        except:
-            print("exception")
+        except Exception as e:
+            print(e.args)
 
 
     def append_Function(self, fun, widget, event):

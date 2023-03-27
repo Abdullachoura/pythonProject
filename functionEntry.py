@@ -2,9 +2,12 @@ import time
 import tkinter
 import tkinter as tk
 import tkinter.messagebox as msgbox
+from tkinter import ttk
+
 from Function import Function
 from Function import TermType
 from Function import exponent_of
+from Function import TrigonometrischerOperator as TriOp
 
 
 class FunctionEntry:
@@ -52,6 +55,36 @@ class FunctionEntry:
             text = tk.Entry(frame, width=5)
             text.pack(side='left')
             self.entry_arr.append(text)
+        elif term_type == TermType.TRIGONOMETRISCH:
+            text = tk.Entry(frame, width=5)
+            text.pack(side='left')
+            self.entry_arr.append(text)
+
+            label = tk.Label(frame, text='*')
+            label.pack(side='left')
+
+            self.trigonomischer_operator = tk.StringVar()
+            comboBox = ttk.Combobox(frame, textvariable=self.trigonomischer_operator)
+            comboBox['values'] = ['sin', 'cos']
+            comboBox['state'] = 'readonly'
+            comboBox.pack(side='left')
+
+            label = tk.Label(frame, text=f'({chr(0x03c9)}t + ')
+            label.pack(side='left')
+
+            text = tk.Entry(frame, width=5)
+            text.pack(side='left')
+            self.entry_arr.append(text)
+
+            label = tk.Label(frame, text=') | T=')
+            label.pack(side='left')
+
+            entry = tk.Entry(frame, width=5)
+            entry.pack(side='left')
+            self.entry_arr.append(entry)
+
+
+
 
 
 
@@ -79,12 +112,19 @@ class FunctionEntry:
             for i in range(len(self.entry_arr)):
                 if i == len(self.entry_arr)-1 and self.termType.GANZ_RATIONAL:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), False)
-                elif i == 0 and self.termType.SCHNITTPUNKT:
+                elif i == 0:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), False)
                 else:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), True)
                 func_factors.append(factor)
-            self.func = Function(self.termType, *func_factors)
+            if self.termType == TermType.TRIGONOMETRISCH:
+                if self.trigonomischer_operator.get() == 'sin':
+                    trigOp = TriOp.SIN
+                elif self.trigonomischer_operator.get() == 'cos':
+                    trigOp = TriOp.COS
+                self.func = Function(self.termType, trigOp, *func_factors)
+            else:
+                self.func = Function(self.termType, *func_factors)
             time.sleep(0.005)
             self.root.destroy()
         except ValueError as e:
