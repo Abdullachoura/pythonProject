@@ -257,17 +257,19 @@ class TrigonomischerTerm:
     def calc_original(self, x):
         to_return = 0
         if self.trigOp == TrigonometrischerOperator.SIN:
-            to_return = self.original[0] * np.sin((np.pi * 2) / self.original[2] + self.original[1])
+            to_return = self.original[0] * np.sin(((np.pi * 2) / self.original[2]) * x + self.original[1])
+        elif self.trigOp == TrigonometrischerOperator.COS:
+            to_return = self.original[0] * np.cos(((np.pi * 2) / self.original[2]) * x + self.original[1])
         return to_return
 
     def calc_deriv1(self, x):
-        return self.deriv1[0] * x + self.deriv1[1]
+        return None
 
     def calc_deriv2(self, x):
-        return self.deriv2[0] * x
+        return None
 
     def calc_deriv3(self, x):
-        return 0
+        return None
 
     def calc_for_range(self, functionDeriv: FunctionDerivative, start, end, inc):
         to_return = []
@@ -296,14 +298,16 @@ class TrigonomischerTerm:
         return to_return
 
     def __str__(self):
-        toReturn = f"{self.original[0]}(x "
-        if self.original[1] < 0:
-            toReturn += f"-{abs(self.original[1])})²"
-        else:
-            toReturn += f"+{self.original[1]})²"
+        toReturn = f"{self.original[0]}*"
+        if self.trigOp == TrigonometrischerOperator.SIN:
+            toReturn += 'sin'
+        elif self.trigOp == TrigonometrischerOperator.COS:
+            toReturn += 'cos'
 
-        if self.original[2] < 0:
-            toReturn += f"-{abs(self.original[2])}"
+        toReturn += f'({chr(0x03c9)}t'
+        if self.original[1] < 0:
+            toReturn += f"-{abs(self.original[1])})"
         else:
-            toReturn += f"+{self.original[2]}"
+            toReturn += f"+{self.original[1]})"
+        toReturn += f' | T={self.original[2]}'
         return toReturn

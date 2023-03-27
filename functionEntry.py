@@ -63,13 +63,14 @@ class FunctionEntry:
             label = tk.Label(frame, text='*')
             label.pack(side='left')
 
-            self.trigonomischer_operator = tk.StringVar()
-            comboBox = ttk.Combobox(frame, textvariable=self.trigonomischer_operator)
-            comboBox['values'] = ['sin', 'cos']
-            comboBox['state'] = 'readonly'
-            comboBox.pack(side='left')
+            #self.trigonomischer_operator = tk.StringVar()
+            self.comboBox = ttk.Combobox(frame)
+            self.comboBox['values'] = ['sin', 'cos']
+            self.comboBox['state'] = 'readonly'
+            self.comboBox.pack(side='left')
+            self.comboBox.bind("<<ComboboxSelected>>", lambda x: print('combobox', self.comboBox.get()))
 
-            label = tk.Label(frame, text=f'({chr(0x03c9)}t + ')
+            label = tk.Label(frame, text=f'({chr(0x03c9)}t')
             label.pack(side='left')
 
             text = tk.Entry(frame, width=5)
@@ -118,9 +119,11 @@ class FunctionEntry:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), True)
                 func_factors.append(factor)
             if self.termType == TermType.TRIGONOMETRISCH:
-                if self.trigonomischer_operator.get() == 'sin':
+                print(self.comboBox.get())
+                trigOp = TriOp.COS
+                if self.comboBox.get() == 'sin':
                     trigOp = TriOp.SIN
-                elif self.trigonomischer_operator.get() == 'cos':
+                elif self.comboBox.get() == 'cos':
                     trigOp = TriOp.COS
                 self.func = Function(self.termType, trigOp, *func_factors)
             else:
