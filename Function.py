@@ -48,6 +48,11 @@ def exponent_of(i: int) -> str:
         val = round(val / 10, 0)
     return str(to_return)
 
+def round(x):
+    a = np.abs(x)
+    b = np.floor(a) + np.floor(2 * (a % 1))
+    return np.sign(x) * b
+
 
 class Function:
 
@@ -75,6 +80,18 @@ class Function:
 
     def arr_calc(self, x_arr, func_type: FunctionDerivative):
         return self.term.arr_calc(x_arr, func_type)
+
+    def calc_nullstellen(self, min, max):
+        arr_to_return = []
+        val = 0
+        for x in range(min, max):
+            val = x
+            for i in range(1000):
+                val = val - self.calc_original(x) / self.calc_deriv1()
+            val = round(val)
+            if not val in arr_to_return:
+                arr_to_return.append(val)
+        return arr_to_return
 
     def deriv1_as_str(self):
         return self.term.deriv1_as_str()
@@ -176,7 +193,9 @@ class GanzrationaleTerm:
         toReturn = ""
         for i in range(len(self.deriv1) - 1, -1, -1):
             if i == 0:
-                if self.deriv1[i] < 0:
+                if len(self.deriv1) == 1:
+                    toReturn += f"{self.deriv1[i]}"
+                elif self.deriv1[i] < 0:
                     toReturn += f"-{abs(self.deriv1[i])}"
                 else:
                     toReturn += f"+{self.deriv1[i]}"
@@ -196,7 +215,9 @@ class GanzrationaleTerm:
         toReturn = ""
         for i in range(len(self.deriv2) - 1, -1, -1):
             if i == 0:
-                if self.deriv2[i] < 0:
+                if len(self.deriv2) == 1:
+                    toReturn += f"{self.deriv2[i]}"
+                elif self.deriv2[i] < 0:
                     toReturn += f"-{abs(self.deriv2[i])}"
                 else:
                     toReturn += f"+{self.deriv2[i]}"
@@ -216,7 +237,9 @@ class GanzrationaleTerm:
         toReturn = ""
         for i in range(len(self.deriv3) - 1, -1, -1):
             if i == 0:
-                if self.deriv3[i] < 0:
+                if len(self.deriv3) == 1:
+                    toReturn += f"{self.deriv3[i]}"
+                elif self.deriv3[i] < 0:
                     toReturn += f"-{abs(self.deriv3[i])}"
                 else:
                     toReturn += f"+{self.deriv3[i]}"
@@ -237,6 +260,8 @@ class GanzrationaleTerm:
         toReturn = ""
         for i in range(len(self.original)-1, -1, -1):
             if i == 0:
+                if len(self.original) == 1:
+                    toReturn += f"{self.original[i]}"
                 if self.original[i] < 0:
                     toReturn += f"-{abs(self.original[i])}"
                 else:

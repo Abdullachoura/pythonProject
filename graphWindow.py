@@ -67,14 +67,14 @@ class GraphWindow:
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=1, side="right")
 
-        self.frame_list_info = tk.Frame(funcFrame)
+        self.frame_list_info = tk.Frame(funcFrame, width=50)
         self.frame_list_info.pack(side="left", fill='y')
 
-        self.list_functions = tk.Listbox(self.frame_list_info, listvariable=self.funcListVar)
+        self.list_functions = tk.Listbox(self.frame_list_info, listvariable=self.funcListVar, width=50)
         self.list_functions.pack(side="top", fill="y")
         self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
 
-        self.frame_info = tk.Frame(self.frame_list_info)
+        self.frame_info = tk.Frame(self.frame_list_info, width=50)
         self.frame_info.pack(side='bottom')
 
         frame_scale = tk.Frame(master=self.root)
@@ -166,7 +166,22 @@ class GraphWindow:
 #   end
 
     def display_func_info(self, event):
-        func = self.functionList[self.list_functions.curselection()[0]]
+        list = self.frame_info.grid_slaves()
+        for widget in list:
+            widget.destroy()
+
+        index = self.list_functions.curselection()[0]
+        func = self.functionList[index]
+
+        label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}'(x)={func.deriv1_as_str()}")
+        label.grid(row=0)
+
+        label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}''(x)={func.deriv2_as_str()}")
+        label.grid(row=1)
+
+        label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}'''(x)={func.deriv3_as_str()}")
+        label.grid(row=2)
+
 
 
 
