@@ -72,6 +72,7 @@ class GraphWindow:
 
         self.list_functions = tk.Listbox(self.frame_list_info, listvariable=self.funcListVar)
         self.list_functions.pack(side="top", fill="y")
+        self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
 
         self.frame_info = tk.Frame(self.frame_list_info)
         self.frame_info.pack(side='bottom')
@@ -91,6 +92,8 @@ class GraphWindow:
         self.root.mainloop()
 
 
+
+#   update
     def update_list(self):
         list = ()
         funChar = ord('f')
@@ -126,8 +129,9 @@ class GraphWindow:
     def update_window(self):
         self.update_list()
         self.update_canvas()
+#   end
 
-
+#   scaling
     def increment_scale(self):
         try:
             self.scale = float(self.scaleVar.get())
@@ -159,6 +163,12 @@ class GraphWindow:
             self.scaleVar.set(str(self.scale))
         except Exception as e:
             print(e.args)
+#   end
+
+    def display_func_info(self, event):
+        func = self.functionList[self.list_functions.curselection()[0]]
+
+
 
 
     def append_Function(self, fun, widget, event):
@@ -166,6 +176,7 @@ class GraphWindow:
             self.functionList.append(fun)
             self.update_window()
 
+#   funktions eingabe
     def open_function_entry(self, term_type: fun.TermType, *args):
         fun_entry_win = funent.FunctionEntry(term_type, *args)
         fun_entry_win.root.bind("<Destroy>", lambda x: self.append_Function(fun_entry_win.func, fun_entry_win.root, x))
@@ -190,5 +201,5 @@ class GraphWindow:
                                                                                int(entry.get())))
         button.pack(side='left')
         root.mainloop()
-
+#   end
 
