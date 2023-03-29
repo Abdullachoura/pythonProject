@@ -17,7 +17,7 @@ class TrigonometrischerOperator:
     SIN = 2
 
 
-def exponent_of(i: int) -> str:
+def superscript_of(i: int) -> str:
     val = i
     to_return = ""
     while True:
@@ -45,13 +45,45 @@ def exponent_of(i: int) -> str:
             to_return = chr(0x2079) + to_return
         else:
             raise ValueError("exponent not right value", exponent)
-        val = round(val / 10, 0)
+        val = np.floor(val / 10)
     return str(to_return)
 
-def round(x):
-    a = np.abs(x)
+def subscript_of(i: int) -> str:
+    val = i
+    to_return = ""
+    while True:
+        if val == 0: break
+        exponent = val % 10
+        if exponent == 0:
+            to_return = chr(0x2080) + to_return
+        elif exponent == 1:
+            to_return = chr(0x2081) + to_return
+        elif exponent == 2:
+            to_return = chr(0x2082) + to_return
+        elif exponent == 3:
+            to_return = chr(0x2083) + to_return
+        elif exponent == 4:
+            to_return = chr(0x2084) + to_return
+        elif exponent == 5:
+            to_return = chr(0x2085) + to_return
+        elif exponent == 6:
+            to_return = chr(0x2086) + to_return
+        elif exponent == 7:
+            to_return = chr(0x2087) + to_return
+        elif exponent == 8:
+            to_return = chr(0x2088) + to_return
+        elif exponent == 9:
+            to_return = chr(0x2089) + to_return
+        else:
+            raise ValueError("exponent not right value", exponent)
+        val = np.floor(val / 10)
+    return str(to_return)
+
+def round(x, prec):
+    a = np.abs(x * 10 ** prec)
     b = np.floor(a) + np.floor(2 * (a % 1))
-    return np.sign(x) * b
+    c = np.sign(x) * b / 10 ** prec
+    return c
 
 
 class Function:
@@ -81,16 +113,28 @@ class Function:
     def arr_calc(self, x_arr, func_type: FunctionDerivative):
         return self.term.arr_calc(x_arr, func_type)
 
-    def calc_nullstellen(self, min, max):
+    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max):
+        if funcDer == FunctionDerivative.DERIVATIVE_3:
+            raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
         arr_to_return = []
-        val = 0
-        for x in range(min, max):
-            val = x
+        for x in range(int(min), int(max)):
+            val = float(x)
+            if val == 0:
+                continue
             for i in range(1000):
-                val = val - self.calc_original(x) / self.calc_deriv1()
-            val = round(val)
-            if not val in arr_to_return:
+                try:
+                    if funcDer == FunctionDerivative.ORIGINAL:
+                        val = val - self.calc_original(val) / self.calc_deriv1(val)
+                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                        val = val - self.calc_deriv1(val) / self.calc_deriv2(val)
+                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                        val = val - self.calc_deriv2(val) / self.calc_deriv3(val)
+                except ZeroDivisionError:
+                    break
+            val = round(val, 3)
+            if val not in arr_to_return:
                 arr_to_return.append(val)
+                print(val)
         return arr_to_return
 
     def deriv1_as_str(self):
@@ -205,11 +249,13 @@ class GanzrationaleTerm:
                 else:
                     toReturn += f"+{self.deriv1[i]}x"
             elif len(self.deriv1) - 1 == i:
-                toReturn += f"{self.deriv1[i]}x{exponent_of(i)}"
+                toReturn += f"{self.deriv1[i]}x{superscript_of(i)}"
             elif self.deriv1[i] < 0:
-                toReturn += f"-{abs(self.deriv1[i])}x^{exponent_of(i)}"
+                toReturn += f"-{abs(self.deriv1[i])}x^{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv1[i]}x^{exponent_of(i)}"
+                toReturn += f"+{self.deriv1[i]}x^{superscript_of(i)}"
+        if toReturn == "":
+            toReturn = "0"
         return toReturn
     def deriv2_as_str(self):
         toReturn = ""
@@ -227,11 +273,13 @@ class GanzrationaleTerm:
                 else:
                     toReturn += f"+{self.deriv2[i]}x"
             elif len(self.deriv2) - 1 == i:
-                toReturn += f"{self.deriv2[i]}x{exponent_of(i)}"
+                toReturn += f"{self.deriv2[i]}x{superscript_of(i)}"
             elif self.deriv2[i] < 0:
-                toReturn += f"-{abs(self.deriv2[i])}x^{exponent_of(i)}"
+                toReturn += f"-{abs(self.deriv2[i])}x^{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv2[i]}x^{exponent_of(i)}"
+                toReturn += f"+{self.deriv2[i]}x^{superscript_of(i)}"
+        if toReturn == "":
+            toReturn = "0"
         return toReturn
     def deriv3_as_str(self):
         toReturn = ""
@@ -249,11 +297,13 @@ class GanzrationaleTerm:
                 else:
                     toReturn += f"+{self.deriv3[i]}x"
             elif len(self.deriv3) - 1 == i:
-                toReturn += f"{self.deriv3[i]}x{exponent_of(i)}"
+                toReturn += f"{self.deriv3[i]}x{superscript_of(i)}"
             elif self.deriv3[i] < 0:
-                toReturn += f"-{abs(self.deriv3[i])}x^{exponent_of(i)}"
+                toReturn += f"-{abs(self.deriv3[i])}x^{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv3[i]}x^{exponent_of(i)}"
+                toReturn += f"+{self.deriv3[i]}x^{superscript_of(i)}"
+        if toReturn == "":
+            toReturn = "0"
         return toReturn
 
     def __str__(self):
@@ -272,11 +322,13 @@ class GanzrationaleTerm:
                 else:
                     toReturn += f"+{self.original[i]}x"
             elif len(self.original)-1 == i:
-                toReturn += f"{self.original[i]}x{exponent_of(i)}"
+                toReturn += f"{self.original[i]}x{superscript_of(i)}"
             elif self.original[i] < 0:
-                toReturn += f"-{abs(self.original[i])}x^{exponent_of(i)}"
+                toReturn += f"-{abs(self.original[i])}x^{superscript_of(i)}"
             else:
-                toReturn += f"+{self.original[i]}x^{exponent_of(i)}"
+                toReturn += f"+{self.original[i]}x^{superscript_of(i)}"
+        if toReturn == "":
+            toReturn = "0"
         return toReturn
 
 

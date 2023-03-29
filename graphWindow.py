@@ -166,12 +166,16 @@ class GraphWindow:
 #   end
 
     def display_func_info(self, event):
+
+        try:
+            index = self.list_functions.curselection()[0]
+        except IndexError:
+            return
+
+        func = self.functionList[index]
         list = self.frame_info.grid_slaves()
         for widget in list:
             widget.destroy()
-
-        index = self.list_functions.curselection()[0]
-        func = self.functionList[index]
 
         label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}'(x)={func.deriv1_as_str()}")
         label.grid(row=0)
@@ -181,6 +185,17 @@ class GraphWindow:
 
         label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}'''(x)={func.deriv3_as_str()}")
         label.grid(row=2)
+
+        nullstellen_str = ""
+        nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
+                                                 self.scale * -1, self.scale)
+        null_list_len = len(nullstellen_list)
+        print(null_list_len)
+        for j in range(int(null_list_len / 10)):
+            for i in range(10):
+                nullstellen_str += f"N{fun.subscript_of(i + 1 + j *10)}({nullstellen_list[i]}|0) "
+        label = tk.Label(self.frame_info, text=nullstellen_str)
+        label.grid(row=3)
 
 
 

@@ -6,7 +6,7 @@ from tkinter import ttk
 
 from Function import Function
 from Function import TermType
-from Function import exponent_of
+from Function import superscript_of
 from Function import TrigonometrischerOperator as TriOp
 
 
@@ -35,7 +35,7 @@ class FunctionEntry:
                 if i==1:
                     label_str = 'x'
                 else:
-                    label_str = f'x{exponent_of(i)}'
+                    label_str = f'x{superscript_of(i)}'
                 label = tk.Label(frame, text=label_str)
                 label.pack(side='right')
                 text = tk.Entry(frame, width=5)
@@ -118,7 +118,6 @@ class FunctionEntry:
                     factor = self.convert_factor_entry(self.entry_arr[i].get(), True)
                 func_factors.append(factor)
             if self.termType == TermType.TRIGONOMETRISCH:
-                print(self.comboBox.get())
                 if self.comboBox.get() == 'sin':
                     trigOp = TriOp.SIN
                 elif self.comboBox.get() == 'cos':
