@@ -433,9 +433,9 @@ class TrigonomischerTerm:
     def calc_deriv1(self, x):
         to_return = 0
         if self.trigOp == TrigonometrischerOperator.SIN:
-            to_return = self.deriv1[0] * np.cos((np.pi * 2) / self.deriv1[2] * x + self.deriv1[1])
+            to_return = self.deriv1[0] * (np.cos((np.pi * 2) / self.deriv1[2] * x + self.deriv1[1]))
         elif self.trigOp == TrigonometrischerOperator.COS:
-            to_return = self.deriv1[0] * -1 * np.sin((np.pi * 2) / self.deriv1[2] * x + self.deriv1[1])
+            to_return = self.deriv1[0] * -1 * (np.sin((np.pi * 2) / self.deriv1[2] * x + self.deriv1[1]))
         return to_return
 
     def calc_deriv2(self, x):

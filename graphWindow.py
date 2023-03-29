@@ -191,8 +191,12 @@ class GraphWindow:
                                                  self.scale * -1, self.scale)
         null_list_len = len(nullstellen_list)
         print(null_list_len)
-        for j in range(int(null_list_len / 10)):
-            for i in range(10):
+        for j in range(int(null_list_len / 10) + 1):
+            if null_list_len % 10 == 0:
+                rangevar = 11
+            else:
+                rangevar = null_list_len % 10 + 1
+            for i in range(rangevar):
                 nullstellen_str += f"N{fun.subscript_of(i + 1 + j *10)}({nullstellen_list[i]}|0) "
         label = tk.Label(self.frame_info, text=nullstellen_str)
         label.grid(row=3)
