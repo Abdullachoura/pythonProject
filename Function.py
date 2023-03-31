@@ -1,3 +1,4 @@
+import time
 from enum import Enum
 import numpy as np
 
@@ -116,12 +117,63 @@ class Function:
     def calc_nullstellen(self, funcDer: FunctionDerivative, min, max):
         if funcDer == FunctionDerivative.DERIVATIVE_3:
             raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
+        if self.term is TrigonomischerTerm:
+            raise ValueError("Newtown Methode funktioniert bei Trigonomischen nicht")
+        return_arr_length = -1
+        if isinstance(self.term, GanzrationaleTerm):
+            return_arr_length = len(self.term.original) - 1
+        if isinstance(self.term, SchnittpunktTerm):
+            return_arr_length = 2
         arr_to_return = []
+        start = time.perf_counter()
         for x in range(int(min), int(max)):
             val = float(x)
             if val == 0:
                 continue
-            for i in range(1000):
+            try:
+                duplicate_arr = []
+                for i in range(500):
+                        if funcDer == FunctionDerivative.ORIGINAL:
+                            val = val - self.calc_original(val) / self.calc_deriv1(val)
+                        elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                            val = val - self.calc_deriv1(val) / self.calc_deriv2(val)
+                        elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                            val = val - self.calc_deriv2(val) / self.calc_deriv3(val)
+                        duplicate_arr.append(round(val, 3))
+                ergebnisse = {val for val in duplicate_arr}
+                print("ergebnisse- duplicate_arr, x", abs(len(duplicate_arr) - len(ergebnisse)), x)
+            except ZeroDivisionError:
+                continue
+            val = round(val, 3)
+            if val not in arr_to_return:
+                arr_to_return.append(val)
+        end = time.perf_counter()
+        print(f"{end -start:0.4f} seconds")
+        if return_arr_length == -1:
+            raise ValueError("Dickhead")
+        elif return_arr_length < len(arr_to_return):
+            return None
+        elif return_arr_length > len(arr_to_return):
+            arr_to_return += ['?' for i in range(return_arr_length - len(arr_to_return))]
+        return arr_to_return
+        '''
+        if funcDer == FunctionDerivative.DERIVATIVE_3:
+            raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
+        if self.term is TrigonomischerTerm:
+            raise ValueError("Newtown Methode funktioniert bei Trigonomischen nicht")
+        return_arr_length = -1
+        if isinstance(self.term, GanzrationaleTerm):
+            return_arr_length = len(self.term.original) - 1
+        if isinstance(self.term, SchnittpunktTerm):
+            return_arr_length = 2
+        arr_to_return = []
+        val = -998
+        prev = -999
+        pprev = -1000
+        prevValidVal = 0
+        while True:
+                if val == 0:
+                    val += 1
                 try:
                     if funcDer == FunctionDerivative.ORIGINAL:
                         val = val - self.calc_original(val) / self.calc_deriv1(val)
@@ -130,12 +182,20 @@ class Function:
                     elif funcDer == FunctionDerivative.DERIVATIVE_2:
                         val = val - self.calc_deriv2(val) / self.calc_deriv3(val)
                 except ZeroDivisionError:
-                    break
-            val = round(val, 3)
-            if val not in arr_to_return:
-                arr_to_return.append(val)
-                print(val)
+                    val += 1
+                    continue
+                if abs(prev - val) < 0.0001:
+                    val = round(val, 3)
+                    arr_to_return.append(val)
+                    prevValidVal = val
+                prev = val
+                val += 1
+        if return_arr_length == -1:
+            raise ValueError("Dickhead")
+        elif return_arr_length < len(arr_to_return):
+            return None
         return arr_to_return
+        '''
 
     def deriv1_as_str(self):
         return self.term.deriv1_as_str()
@@ -251,9 +311,9 @@ class GanzrationaleTerm:
             elif len(self.deriv1) - 1 == i:
                 toReturn += f"{self.deriv1[i]}x{superscript_of(i)}"
             elif self.deriv1[i] < 0:
-                toReturn += f"-{abs(self.deriv1[i])}x^{superscript_of(i)}"
+                toReturn += f"-{abs(self.deriv1[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv1[i]}x^{superscript_of(i)}"
+                toReturn += f"+{self.deriv1[i]}x{superscript_of(i)}"
         if toReturn == "":
             toReturn = "0"
         return toReturn
@@ -275,9 +335,9 @@ class GanzrationaleTerm:
             elif len(self.deriv2) - 1 == i:
                 toReturn += f"{self.deriv2[i]}x{superscript_of(i)}"
             elif self.deriv2[i] < 0:
-                toReturn += f"-{abs(self.deriv2[i])}x^{superscript_of(i)}"
+                toReturn += f"-{abs(self.deriv2[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv2[i]}x^{superscript_of(i)}"
+                toReturn += f"+{self.deriv2[i]}x{superscript_of(i)}"
         if toReturn == "":
             toReturn = "0"
         return toReturn
@@ -299,9 +359,9 @@ class GanzrationaleTerm:
             elif len(self.deriv3) - 1 == i:
                 toReturn += f"{self.deriv3[i]}x{superscript_of(i)}"
             elif self.deriv3[i] < 0:
-                toReturn += f"-{abs(self.deriv3[i])}x^{superscript_of(i)}"
+                toReturn += f"-{abs(self.deriv3[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv3[i]}x^{superscript_of(i)}"
+                toReturn += f"+{self.deriv3[i]}x{superscript_of(i)}"
         if toReturn == "":
             toReturn = "0"
         return toReturn
@@ -324,9 +384,9 @@ class GanzrationaleTerm:
             elif len(self.original)-1 == i:
                 toReturn += f"{self.original[i]}x{superscript_of(i)}"
             elif self.original[i] < 0:
-                toReturn += f"-{abs(self.original[i])}x^{superscript_of(i)}"
+                toReturn += f"-{abs(self.original[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.original[i]}x^{superscript_of(i)}"
+                toReturn += f"+{self.original[i]}x{superscript_of(i)}"
         if toReturn == "":
             toReturn = "0"
         return toReturn
@@ -336,7 +396,6 @@ class SchnittpunktTerm:
 
     def __init__(self, *args):
         self.original = []
-        print(args)
         for val in args:
             self.original.append(val)
         self.deriv1 = [self.original[0]*2, self.original[1]*self.original[0]*2]
@@ -450,7 +509,7 @@ class TrigonomischerTerm:
         to_return = 0
         if self.trigOp == TrigonometrischerOperator.SIN:
             to_return = self.deriv2[0] * -1 * np.cos((np.pi * 2) / self.deriv2[2] * x + self.deriv2[1])
-        elif self.trigOp == TrigonometrischerOperator.Cos:
+        elif self.trigOp == TrigonometrischerOperator.COS:
             to_return = self.deriv2[0] * np.sin((np.pi * 2) / self.deriv2[2] * x + self.deriv2[1])
         return  to_return
 

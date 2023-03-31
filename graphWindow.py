@@ -1,5 +1,6 @@
 
 import tkinter as tk
+import types
 
 import matplotlib.axes
 
@@ -71,7 +72,7 @@ class GraphWindow:
         self.frame_list_info.pack(side="left", fill='y')
 
         self.list_functions = tk.Listbox(self.frame_list_info, listvariable=self.funcListVar, width=50)
-        self.list_functions.pack(side="top", fill="y")
+        self.list_functions.pack(side="top", fill="both")
         self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
 
         self.frame_info = tk.Frame(self.frame_list_info, width=50)
@@ -189,17 +190,25 @@ class GraphWindow:
         nullstellen_str = ""
         nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
                                                  self.scale * -1, self.scale)
-        null_list_len = len(nullstellen_list)
-        print(null_list_len)
-        for j in range(int(null_list_len / 10) + 1):
-            if null_list_len % 10 == 0:
-                rangevar = 11
-            else:
-                rangevar = null_list_len % 10 + 1
-            for i in range(rangevar):
-                nullstellen_str += f"N{fun.subscript_of(i + 1 + j *10)}({nullstellen_list[i]}|0) "
-        label = tk.Label(self.frame_info, text=nullstellen_str)
-        label.grid(row=3)
+        if isinstance(nullstellen_list, types.NoneType):
+            label = tk.Label(self.frame_info, text="keine Nullstellen innerhalb d. Kordinaten systems")
+            label.grid(row=3)
+        else:
+            null_list_len = len(nullstellen_list)
+            for j in range(int(null_list_len / 10) + 1):
+                print("j", j)
+                if null_list_len % 10 == 0:
+                    rangevar = 10
+                else:
+                    rangevar = null_list_len % 10
+                print("rangevar", rangevar)
+                for i in range(rangevar):
+                    print("i + 1 + j * 10", i + 1 + j * 10)
+                    print("nullstellen_list[i]", nullstellen_list[i])
+                    print("i", i)
+                    nullstellen_str += f"N{fun.subscript_of(i + 1 + j *10)}({nullstellen_list[i]}|0) "
+                label = tk.Label(self.frame_info, text=nullstellen_str)
+                label.grid(row=j + 3)
 
 
 
