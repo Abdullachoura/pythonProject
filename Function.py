@@ -1,5 +1,7 @@
 import time
 from enum import Enum
+
+import kiwisolver
 import numpy as np
 
 class FunctionDerivative(Enum):
@@ -13,9 +15,21 @@ class TermType(Enum):
     SCHNITTPUNKT = 2
     TRIGONOMETRISCH = 3
 
-class TrigonometrischerOperator:
+class TrigonometrischerOperator(Enum):
     COS = 1
     SIN = 2
+
+def dx(f, val):
+    return abs(0-f(val))
+
+def newton_verfahren(f, fd, val, acc):
+    delta = dx(f, val)
+    steps = 0
+    while delta > acc and steps < 200:
+        val = val - f(val) / fd(val)
+        delta = dx(f, val)
+        steps += 1
+    return val
 
 
 def superscript_of(i: int) -> str:
@@ -114,7 +128,7 @@ class Function:
     def arr_calc(self, x_arr, func_type: FunctionDerivative):
         return self.term.arr_calc(x_arr, func_type)
 
-    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max):
+    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max) -> []:
         if funcDer == FunctionDerivative.DERIVATIVE_3:
             raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
         if self.term is TrigonomischerTerm:
@@ -124,36 +138,35 @@ class Function:
             return_arr_length = len(self.term.original) - 1
         if isinstance(self.term, SchnittpunktTerm):
             return_arr_length = 2
-        arr_to_return = []
-        start = time.perf_counter()
-        for x in range(int(min), int(max)):
-            val = float(x)
-            if val == 0:
-                continue
-            try:
-                duplicate_arr = []
-                for i in range(500):
-                        if funcDer == FunctionDerivative.ORIGINAL:
-                            val = val - self.calc_original(val) / self.calc_deriv1(val)
-                        elif funcDer == FunctionDerivative.DERIVATIVE_1:
-                            val = val - self.calc_deriv1(val) / self.calc_deriv2(val)
-                        elif funcDer == FunctionDerivative.DERIVATIVE_2:
-                            val = val - self.calc_deriv2(val) / self.calc_deriv3(val)
-                        duplicate_arr.append(round(val, 3))
-                ergebnisse = {val for val in duplicate_arr}
-                #print("ergebnisse- duplicate_arr, x", abs(len(duplicate_arr) - len(ergebnisse)), x)
-            except ZeroDivisionError:
-                continue
-            val = round(val, 3)
-            if val not in arr_to_return:
-                arr_to_return.append(val)
-        #print(f"{end -start:0.4f} seconds")
-        if return_arr_length == -1:
-            raise ValueError("Dickhead")
-        elif return_arr_length < len(arr_to_return):
-            return None
-        elif return_arr_length > len(arr_to_return):
-            arr_to_return += ['?' for i in range(return_arr_length - len(arr_to_return))]
+        if isinstance(self.term, TrigonomischerTerm):
+
+        else:
+            arr_to_return = []
+            for x in range(int(min), int(max)):
+                val = float(x)
+                if val == 0:
+                    continue
+                try:
+                    duplicate_arr = []
+                    if funcDer == FunctionDerivative.ORIGINAL:
+                        val = newton_verfahren(self.calc_original, self.calc_deriv1, val, 0.001)
+                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                        val = newton_verfahren(self.calc_deriv1, self.calc_deriv2, val, 0.001)
+                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                        val = newton_verfahren(self.calc_deriv2, self.calc_deriv3, val, 0.001)
+                except ZeroDivisionError:
+                    continue
+                val = round(val, 3)
+                if (val, 0) not in arr_to_return:
+                    arr_to_return.append((val, 0))
+                if len(arr_to_return) == return_arr_length:
+                    break
+            if return_arr_length == -1:
+                raise ValueError("Dickhead")
+            elif return_arr_length < len(arr_to_return):
+                return None
+        #elif return_arr_length > len(arr_to_return):
+            #arr_to_return += [None for i in range(return_arr_length - len(arr_to_return))]
         return arr_to_return
 
         '''
@@ -199,6 +212,11 @@ class Function:
             arr_to_return += ['?' for i in range(return_arr_length - len(arr_to_return))]
         return arr_to_return
         '''
+
+    def calc_extrempunkte(self, funcDer: FunctionDerivative, min, max):
+        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 2:
+            raise ValueError("term ist linear und hat keine Extrempunkte")
+
 
     def deriv1_as_str(self):
         return self.term.deriv1_as_str()

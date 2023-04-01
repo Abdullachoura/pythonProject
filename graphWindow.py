@@ -194,6 +194,29 @@ class GraphWindow:
             label = tk.Label(self.frame_info, text="keine Nullstellen innerhalb d. Kordinaten systems")
             label.grid(row=3)
         else:
+            for i in range(len(nullstellen_list)):
+                self.ax.plot(nullstellen_list[i][0], 0, 'bo')
+                self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
+                             f'N{fun.subscript_of(i + 1)}')
+            null_list_len = len(nullstellen_list)
+            for j in range(int(null_list_len / 10) + 1):
+                print("j", j)
+                if null_list_len % 10 == 0:
+                    rangevar = 10
+                else:
+                    rangevar = null_list_len % 10
+                print("rangevar", rangevar)
+                for i in range(rangevar):
+                    print("i + 1 + j * 10", i + 1 + j * 10)
+                    print("nullstellen_list[i]", nullstellen_list[i])
+                    print("i", i)
+                    nullstellen_str += f"N{fun.subscript_of(i + 1 + j * 10)}{nullstellen_list[i]} "
+                label = tk.Label(self.frame_info, text=nullstellen_str)
+                label.grid(row=j + 3)
+            self.canvas.draw()
+
+
+            '''
             null_list_len = len(nullstellen_list)
             for j in range(int(null_list_len / 10) + 1):
                 print("j", j)
@@ -209,6 +232,7 @@ class GraphWindow:
                     nullstellen_str += f"N{fun.subscript_of(i + 1 + j *10)}({nullstellen_list[i]}|0) "
                 label = tk.Label(self.frame_info, text=nullstellen_str)
                 label.grid(row=j + 3)
+                '''
 
 
 
