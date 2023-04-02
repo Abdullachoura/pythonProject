@@ -71,11 +71,14 @@ class GraphWindow:
         self.frame_list_info = tk.Frame(funcFrame, width=50)
         self.frame_list_info.pack(side="left", fill='y')
 
-        self.list_functions = tk.Listbox(self.frame_list_info, listvariable=self.funcListVar, width=50)
-        self.list_functions.pack(side="top", fill="both")
+        frame_list = tk.Frame(self.frame_list_info)
+        frame_list.pack(side='top')
+
+        self.list_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
+        self.list_functions.pack(side="left", fill="both")
         self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
 
-        scrollbar = tk.Scrollbar(self.list_functions, orient='vertical')
+        scrollbar = tk.Scrollbar(frame_list, orient='vertical')
         scrollbar.config(command=self.list_functions.yview)
         scrollbar.pack(side='right', fill='both')
         self.list_functions.config(yscrollcommand=scrollbar.set, width=50)
