@@ -139,6 +139,37 @@ class Function:
         if isinstance(self.term, SchnittpunktTerm):
             return_arr_length = 2
         if isinstance(self.term, TrigonomischerTerm):
+            arr_to_return = []
+            w = (np.pi * 2) / self.term.original[2]
+            val = 0
+            i = min
+            while val <= max:
+                if self.term.trigOp == TrigonometrischerOperator.SIN:
+                    val = (self.term.original[2]/2 * i) + self.term.original[1]
+                elif self.term.trigOp == TrigonometrischerOperator.COS:
+                    val = (self.term.original[2]/2 * i) + self.term.original[1] + (self.term.original[2] / 4)
+                if min < val < max:
+                    print("append val:", val)
+                    arr_to_return.append((val, 0))
+                i += 1
+            print("trigop", self.term.trigOp)
+            print("i", i)
+            print("arr_to_return: ", arr_to_return)
+            print("T", self.term.original[2])
+            print("val", val)
+            '''
+            index = 0
+            highest_val = 0
+
+            while highest_val < abs(min - max):
+                for i in range(len(nullstellen_d_periode)):
+                    nullwerte.append(nullstellen_d_periode[i] + w * index)
+                    highest_val = nullwerte[i] + w * index
+                index += 1
+            for value in nullwerte:
+                arr_to_return.append((value + min, 0))
+            print(arr_to_return)
+            '''
 
         else:
             arr_to_return = []
@@ -147,7 +178,6 @@ class Function:
                 if val == 0:
                     continue
                 try:
-                    duplicate_arr = []
                     if funcDer == FunctionDerivative.ORIGINAL:
                         val = newton_verfahren(self.calc_original, self.calc_deriv1, val, 0.001)
                     elif funcDer == FunctionDerivative.DERIVATIVE_1:

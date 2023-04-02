@@ -75,6 +75,11 @@ class GraphWindow:
         self.list_functions.pack(side="top", fill="both")
         self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
 
+        scrollbar = tk.Scrollbar(self.list_functions, orient='vertical')
+        scrollbar.config(command=self.list_functions.yview)
+        scrollbar.pack(side='right', fill='both')
+        self.list_functions.config(yscrollcommand=scrollbar.set, width=50)
+
         self.frame_info = tk.Frame(self.frame_list_info, width=50)
         self.frame_info.pack(side='bottom')
 
@@ -167,7 +172,7 @@ class GraphWindow:
 #   end
 
     def display_func_info(self, event):
-
+        self.update_canvas()
         try:
             index = self.list_functions.curselection()[0]
         except IndexError:
@@ -200,7 +205,7 @@ class GraphWindow:
                              f'N{fun.subscript_of(i + 1)}')
             null_list_len = len(nullstellen_list)
             for j in range(int(null_list_len / 10) + 1):
-                print("j", j)
+                #print("j", j)
                 if null_list_len % 10 == 0:
                     rangevar = 10
                 else:
