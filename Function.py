@@ -67,7 +67,6 @@ def subscript_of(i: int) -> str:
     val = i
     to_return = ""
     while True:
-        if val == 0: break
         exponent = val % 10
         if exponent == 0:
             to_return = chr(0x2080) + to_return
@@ -92,6 +91,7 @@ def subscript_of(i: int) -> str:
         else:
             raise ValueError("exponent not right value", exponent)
         val = np.floor(val / 10)
+        if val == 0: break
     return str(to_return)
 
 def round(x, prec):
@@ -128,26 +128,30 @@ class Function:
     def arr_calc(self, x_arr, func_type: FunctionDerivative):
         return self.term.arr_calc(x_arr, func_type)
 
-    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max) -> []:
+    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max, streckung=None) -> []:
         if funcDer == FunctionDerivative.DERIVATIVE_3:
             raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
-        if self.term is TrigonomischerTerm:
-            raise ValueError("Newtown Methode funktioniert bei Trigonomischen nicht")
         return_arr_length = -1
         if isinstance(self.term, GanzrationaleTerm):
             return_arr_length = len(self.term.original) - 1
         if isinstance(self.term, SchnittpunktTerm):
             return_arr_length = 2
+            if np.sign(self.term.original[0]) == np.sign(self.term.original[2]):
+                return []
         if isinstance(self.term, TrigonomischerTerm):
             arr_to_return = []
-            w = (np.pi * 2) / self.term.original[2]
+            half_pi = np.pi / 2
+            w = 2 * np.pi / self.term.original[2]
+            streckung = self.term.original[2]/2
+            verschiebung = (self.term.original[1] % np.pi) / np.pi * self.term.original[2]
             val = 0
-            i = min
+            i = int(min)
             while val <= max:
                 if self.term.trigOp == TrigonometrischerOperator.SIN:
-                    val = (self.term.original[2]/2 * i) + self.term.original[1]
+                    #2 * pi / T * t + phi
+                    val = (i * np.pi - self.term.original[1]) / w
                 elif self.term.trigOp == TrigonometrischerOperator.COS:
-                    val = (self.term.original[2]/2 * i) + self.term.original[1] + (self.term.original[2] / 4)
+                    val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
                 if min < val < max:
                     print("append val:", val)
                     arr_to_return.append((val, 0))
@@ -157,20 +161,6 @@ class Function:
             print("arr_to_return: ", arr_to_return)
             print("T", self.term.original[2])
             print("val", val)
-            '''
-            index = 0
-            highest_val = 0
-
-            while highest_val < abs(min - max):
-                for i in range(len(nullstellen_d_periode)):
-                    nullwerte.append(nullstellen_d_periode[i] + w * index)
-                    highest_val = nullwerte[i] + w * index
-                index += 1
-            for value in nullwerte:
-                arr_to_return.append((value + min, 0))
-            print(arr_to_return)
-            '''
-
         else:
             arr_to_return = []
             for x in range(int(min), int(max)):
@@ -199,53 +189,11 @@ class Function:
             #arr_to_return += [None for i in range(return_arr_length - len(arr_to_return))]
         return arr_to_return
 
-        '''
-                if funcDer == FunctionDerivative.DERIVATIVE_3:
-            raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
-        if self.term is TrigonomischerTerm:
-            raise ValueError("Newtown Methode funktioniert bei Trigonomischen nicht")
-        return_arr_length = -1
-        if isinstance(self.term, GanzrationaleTerm):
-            return_arr_length = len(self.term.original) - 1
-        if isinstance(self.term, SchnittpunktTerm):
-            return_arr_length = 2
-        arr_to_return = []
-        start = time.perf_counter()
-        for x in range(int(min), int(max)):
-            val = float(x)
-            if val == 0:
-                continue
-            try:
-                duplicate_arr = []
-                for i in range(500):
-                        if funcDer == FunctionDerivative.ORIGINAL:
-                            val = val - self.calc_original(val) / self.calc_deriv1(val)
-                        elif funcDer == FunctionDerivative.DERIVATIVE_1:
-                            val = val - self.calc_deriv1(val) / self.calc_deriv2(val)
-                        elif funcDer == FunctionDerivative.DERIVATIVE_2:
-                            val = val - self.calc_deriv2(val) / self.calc_deriv3(val)
-                        duplicate_arr.append(round(val, 3))
-                ergebnisse = {val for val in duplicate_arr}
-                print("ergebnisse- duplicate_arr, x", abs(len(duplicate_arr) - len(ergebnisse)), x)
-            except ZeroDivisionError:
-                continue
-            val = round(val, 3)
-            if val not in arr_to_return:
-                arr_to_return.append(val)
-        end = time.perf_counter()
-        print(f"{end -start:0.4f} seconds")
-        if return_arr_length == -1:
-            raise ValueError("Dickhead")
-        elif return_arr_length < len(arr_to_return):
-            return None
-        elif return_arr_length > len(arr_to_return):
-            arr_to_return += ['?' for i in range(return_arr_length - len(arr_to_return))]
-        return arr_to_return
-        '''
-
-    def calc_extrempunkte(self, funcDer: FunctionDerivative, min, max):
+    def calc_extrempunkte(self, min, max):
         if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 2:
             raise ValueError("term ist linear und hat keine Extrempunkte")
+        extrempunkte = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
+        print("Extrempunkte", extrempunkte)
 
 
     def deriv1_as_str(self):

@@ -31,6 +31,8 @@ class GraphWindow:
         self.scaleVar = tk.StringVar()
         self.scaleVar.set("10")
         self.funcListVar = tk.Variable(value=())
+        self.nullstellenListVar = tk.Variable(value=())
+        self.extremstellenListVar = tk.Variable(value=())
 
         self.root.title('Functional')
 
@@ -74,6 +76,8 @@ class GraphWindow:
         frame_list = tk.Frame(self.frame_list_info)
         frame_list.pack(side='top')
 
+        label = tk.Label(frame_list, text='Funktionen')
+        label.pack(side='top')
         self.list_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
         self.list_functions.pack(side="left", fill="both")
         self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
@@ -83,8 +87,50 @@ class GraphWindow:
         scrollbar.pack(side='right', fill='both')
         self.list_functions.config(yscrollcommand=scrollbar.set, width=50)
 
-        self.frame_info = tk.Frame(self.frame_list_info, width=50)
-        self.frame_info.pack(side='bottom')
+        label = tk.Label(self.frame_list_info, text="ableitungen")
+        label.pack(side='top')
+        self.frame_ableitungen = tk.Frame(self.frame_list_info, width=50)
+        self.frame_ableitungen.pack(side='top')
+
+        frame_stellen = tk.Frame(self.frame_list_info)
+        frame_stellen.pack(side='bottom')
+
+        frame_nullstellen_list = tk.Frame(frame_stellen)
+        frame_nullstellen_list.pack(side='left')
+        label = tk.Label(frame_nullstellen_list, text='Nullstellen')
+        label.pack(side='top')
+        self.list_nullstellen = tk.Listbox(frame_nullstellen_list, listvariable=self.nullstellenListVar)
+        self.list_nullstellen.pack(side='left', fill='both')
+        scrollbar = tk.Scrollbar(frame_nullstellen_list, orient='vertical')
+        scrollbar.config(command=self.list_nullstellen.yview)
+        scrollbar.pack(side='right', fill='both')
+        self.list_nullstellen.config(yscrollcommand=scrollbar.set)
+
+        frame_extremstellen_list = tk.Frame(frame_stellen)
+        frame_extremstellen_list.pack(side='left')
+        label = tk.Label(frame_extremstellen_list, text='Extremstellen')
+        label.pack(side='top')
+        list_extremstellen = tk.Listbox(frame_extremstellen_list, listvariable=self.extremstellenListVar)
+        list_extremstellen.pack(side='left', fill='both')
+        scrollbar = tk.Scrollbar(frame_extremstellen_list, orient='vertical')
+        scrollbar.config(command=list_extremstellen.yview)
+        scrollbar.pack(side='right', fill='both')
+        list_extremstellen.config(yscrollcommand=scrollbar.set)
+
+        frame_wendestellen_list = tk.Frame(frame_stellen)
+        frame_wendestellen_list.pack(side='left')
+        label = tk.Label(frame_wendestellen_list, text='Wendestellen')
+        label.pack(side='top')
+        list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.extremstellenListVar)
+        list_wendestellen.pack(side='left', fill='both')
+        scrollbar = tk.Scrollbar(frame_wendestellen_list, orient='vertical')
+        scrollbar.config(command=list_wendestellen.yview)
+        scrollbar.pack(side='right', fill='both')
+        list_wendestellen.config(yscrollcommand=scrollbar.set)
+
+
+
+
 
         frame_scale = tk.Frame(master=self.root)
         frame_scale.pack(side="bottom", fill='x')
@@ -182,30 +228,38 @@ class GraphWindow:
             return
 
         func = self.functionList[index]
-        list = self.frame_info.grid_slaves()
+        list = self.frame_ableitungen.grid_slaves()
         for widget in list:
             widget.destroy()
 
-        label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}'(x)={func.deriv1_as_str()}")
+        label = tk.Label(self.frame_ableitungen, text=f"{chr(ord('f') + index)}'(x)={func.deriv1_as_str()}")
         label.grid(row=0)
 
-        label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}''(x)={func.deriv2_as_str()}")
+        label = tk.Label(self.frame_ableitungen, text=f"{chr(ord('f') + index)}''(x)={func.deriv2_as_str()}")
         label.grid(row=1)
 
-        label = tk.Label(self.frame_info, text=f"{chr(ord('f') + index)}'''(x)={func.deriv3_as_str()}")
+        label = tk.Label(self.frame_ableitungen, text=f"{chr(ord('f') + index)}'''(x)={func.deriv3_as_str()}")
         label.grid(row=2)
 
         nullstellen_str = ""
         nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
                                                  self.scale * -1, self.scale)
         if isinstance(nullstellen_list, types.NoneType):
-            label = tk.Label(self.frame_info, text="keine Nullstellen innerhalb d. Kordinaten systems")
+            label = tk.Label(self.frame_ableitungen, text="keine Nullstellen innerhalb d. Kordinaten systems")
             label.grid(row=3)
         else:
+            nullstellen = []
+            for i in range(len(nullstellen_list)):
+                nullstellen.append(f"N{fun.subscript_of(i + 1)}{nullstellen_list[i]}")
+            self.nullstellenListVar.set(nullstellen)
+
             for i in range(len(nullstellen_list)):
                 self.ax.plot(nullstellen_list[i][0], 0, 'bo')
                 self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
                              f'N{fun.subscript_of(i + 1)}')
+
+
+            '''
             null_list_len = len(nullstellen_list)
             for j in range(int(null_list_len / 10) + 1):
                 #print("j", j)
@@ -219,8 +273,9 @@ class GraphWindow:
                     print("nullstellen_list[i]", nullstellen_list[i])
                     print("i", i)
                     nullstellen_str += f"N{fun.subscript_of(i + 1 + j * 10)}{nullstellen_list[i]} "
-                label = tk.Label(self.frame_info, text=nullstellen_str)
+                label = tk.Label(self.frame_ableitungen, text=nullstellen_str)
                 label.grid(row=j + 3)
+            '''
             self.canvas.draw()
 
 
