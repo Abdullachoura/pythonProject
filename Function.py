@@ -1,4 +1,5 @@
 import time
+import types
 from enum import Enum
 
 import kiwisolver
@@ -29,6 +30,8 @@ def newton_verfahren(f, fd, val, acc):
         val = val - f(val) / fd(val)
         delta = dx(f, val)
         steps += 1
+    if steps >= 200:
+        val = None
     return val
 
 
@@ -153,7 +156,12 @@ class Function:
                     elif funcDer == FunctionDerivative.DERIVATIVE_2:
                         val = (i * np.pi - self.term.original[1]) / w
                 elif self.term.trigOp == TrigonometrischerOperator.COS:
-                    val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
+                    if funcDer == FunctionDerivative.ORIGINAL:
+                        val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
+                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                        val = (i * np.pi - self.term.original[1]) / w
+                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                        val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
                 if min < val < max:
                     print("append val:", val)
                     arr_to_return.append((val, 0))
@@ -178,6 +186,8 @@ class Function:
                         val = newton_verfahren(self.calc_deriv2, self.calc_deriv3, val, 0.001)
                 except ZeroDivisionError:
                     continue
+                if isinstance(val, types.NoneType):
+                    continue
                 val = round(val, 3)
                 if (val, 0) not in arr_to_return:
                     arr_to_return.append((val, 0))
@@ -194,8 +204,18 @@ class Function:
     def calc_extrempunkte(self, min, max):
         if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 2:
             raise ValueError("term ist linear und hat keine Extrempunkte")
-        extrempunkte = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
-        print("Extrempunkte", extrempunkte)
+        ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
+        print("ableitung1_nullstellen", ableitung1_nullstellen)
+        extremwerte = [nullstelle[0] for nullstelle in ableitung1_nullstellen]
+        print("extremwerte", extremwerte)
+        extremstellen_y = self.arr_calc(extremwerte, FunctionDerivative.ORIGINAL)
+        print("extremstellen", extremstellen_y)
+        extremstellen = []
+        for i in range(len(extremstellen_y)):
+            extremstellen.append((extremwerte[i], extremstellen_y[i]))
+        print("extremstellen", extremstellen)
+        return extremstellen
+
 
 
     def deriv1_as_str(self):
@@ -257,7 +277,7 @@ class GanzrationaleTerm:
     def calc_deriv3(self, x):
         to_return = 0
         for i in range(len(self.deriv3)):
-            to_return = self.deriv3 * x ** float(i)
+            to_return = self.deriv3[i] * x ** float(i)
         return to_return
 
     def calc_for_range(self, fun_type: FunctionDerivative, min, max, inc):

@@ -32,7 +32,7 @@ class GraphWindow:
         self.scaleVar.set("10")
         self.funcListVar = tk.Variable(value=())
         self.nullstellenListVar = tk.Variable(value=())
-        self.extremstellenListVar = tk.Variable(value=())
+        self.extrempunkteListVar = tk.Variable(value=())
 
         self.root.title('Functional')
 
@@ -110,7 +110,7 @@ class GraphWindow:
         frame_extremstellen_list.pack(side='left')
         label = tk.Label(frame_extremstellen_list, text='Extremstellen')
         label.pack(side='top')
-        list_extremstellen = tk.Listbox(frame_extremstellen_list, listvariable=self.extremstellenListVar)
+        list_extremstellen = tk.Listbox(frame_extremstellen_list, listvariable=self.extrempunkteListVar)
         list_extremstellen.pack(side='left', fill='both')
         scrollbar = tk.Scrollbar(frame_extremstellen_list, orient='vertical')
         scrollbar.config(command=list_extremstellen.yview)
@@ -121,7 +121,7 @@ class GraphWindow:
         frame_wendestellen_list.pack(side='left')
         label = tk.Label(frame_wendestellen_list, text='Wendestellen')
         label.pack(side='top')
-        list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.extremstellenListVar)
+        list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.extrempunkteListVar)
         list_wendestellen.pack(side='left', fill='both')
         scrollbar = tk.Scrollbar(frame_wendestellen_list, orient='vertical')
         scrollbar.config(command=list_wendestellen.yview)
@@ -258,25 +258,39 @@ class GraphWindow:
                 self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
                              f'N{fun.subscript_of(i + 1)}')
 
-
-            '''
-            null_list_len = len(nullstellen_list)
-            for j in range(int(null_list_len / 10) + 1):
-                #print("j", j)
-                if null_list_len % 10 == 0:
-                    rangevar = 10
-                else:
-                    rangevar = null_list_len % 10
-                print("rangevar", rangevar)
-                for i in range(rangevar):
-                    print("i + 1 + j * 10", i + 1 + j * 10)
-                    print("nullstellen_list[i]", nullstellen_list[i])
-                    print("i", i)
-                    nullstellen_str += f"N{fun.subscript_of(i + 1 + j * 10)}{nullstellen_list[i]} "
-                label = tk.Label(self.frame_ableitungen, text=nullstellen_str)
-                label.grid(row=j + 3)
-            '''
-            extrempunkte = func.calc_extrempunkte(self.scale * -1, self.scale)
+            extrempunkte_list = func.calc_extrempunkte(self.scale * -1, self.scale)
+            if isinstance(extrempunkte_list, types.NoneType):
+                label = tk.Label(self.frame_ableitungen, text="keine extrempunkte innerhalb d. Kordinaten systems")
+                label.grid(row=3)
+            else:
+                deriv3_für_extrempunkte = []
+                for i in range(len(extrempunkte_list)):
+                    deriv3_für_extrempunkte.append(func.calc_deriv2(extrempunkte_list[i][0]))
+                print("deriv3_für_extrempunkte", deriv3_für_extrempunkte)
+                extrempunkte = []
+                tp_i = 1
+                hp_i = 1
+                for i in range(len(extrempunkte_list)):
+                    if deriv3_für_extrempunkte[i] > 0:
+                        extrempunkte.append(f"TP{fun.subscript_of(tp_i)}{extrempunkte_list[i]}")
+                        tp_i += 1
+                    elif deriv3_für_extrempunkte[i] < 0:
+                        extrempunkte.append(f"HP{fun.subscript_of(hp_i)}{extrempunkte_list[i]}")
+                        hp_i += 1
+                self.extrempunkteListVar.set(extrempunkte)
+                tp_i = 1
+                hp_i = 1
+                for i in range(len(extrempunkte_list)):
+                    if deriv3_für_extrempunkte[i] > 0:
+                        self.ax.plot(extrempunkte_list[i][0], extrempunkte_list[i][1], 'bo')
+                        self.ax.text(extrempunkte_list[i][0] + 0.02, extrempunkte_list[i][1] + 0.02,
+                                     f'TP{fun.subscript_of(tp_i)}')
+                        tp_i += 1
+                    elif deriv3_für_extrempunkte[i] < 0:
+                        self.ax.plot(extrempunkte_list[i][0], extrempunkte_list[i][1], 'bo')
+                        self.ax.text(extrempunkte_list[i][0] + 0.02, extrempunkte_list[i][1] + 0.02,
+                                     f'HP{fun.subscript_of(hp_i)}')
+                        hp_i += 1
 
             self.canvas.draw()
 
