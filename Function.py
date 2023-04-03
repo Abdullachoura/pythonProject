@@ -139,17 +139,19 @@ class Function:
             if np.sign(self.term.original[0]) == np.sign(self.term.original[2]):
                 return []
         if isinstance(self.term, TrigonomischerTerm):
+            to_use_arr = []
             arr_to_return = []
-            half_pi = np.pi / 2
             w = 2 * np.pi / self.term.original[2]
-            streckung = self.term.original[2]/2
-            verschiebung = (self.term.original[1] % np.pi) / np.pi * self.term.original[2]
             val = 0
             i = int(min)
             while val <= max:
                 if self.term.trigOp == TrigonometrischerOperator.SIN:
-                    #2 * pi / T * t + phi
-                    val = (i * np.pi - self.term.original[1]) / w
+                    if funcDer == FunctionDerivative.ORIGINAL:
+                        val = (i * np.pi - self.term.original[1]) / w
+                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                        val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
+                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                        val = (i * np.pi - self.term.original[1]) / w
                 elif self.term.trigOp == TrigonometrischerOperator.COS:
                     val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
                 if min < val < max:

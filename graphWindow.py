@@ -276,6 +276,8 @@ class GraphWindow:
                 label = tk.Label(self.frame_ableitungen, text=nullstellen_str)
                 label.grid(row=j + 3)
             '''
+            extrempunkte = func.calc_extrempunkte(self.scale * -1, self.scale)
+
             self.canvas.draw()
 
 
