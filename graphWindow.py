@@ -23,13 +23,13 @@ class GraphWindow:
     offset_y: float
 
     def __init__(self):
-        self.scale = 10
+        self.scale = 20
         self.offset_x = 0
         self.offset_y = 0
         self.functionList = []
         self.root = tk.Tk()
         self.scaleVar = tk.StringVar()
-        self.scaleVar.set("10")
+        self.scaleVar.set("20")
         self.offset_y_Var = tk.StringVar()
         self.offset_y_Var.set("0")
         self.offset_x_Var = tk.StringVar()
@@ -61,8 +61,8 @@ class GraphWindow:
         self.ax.spines['top'].set_color('none')
         self.ax.patch.set_edgecolor('grey')
         self.ax.patch.set_linewidth(1)
-        self.ax.set_xlim(-1 * self.scale + self.offset_x, self.scale + self.offset_x)
-        self.ax.set_ylim(-1 * self.scale + self.offset_y, self.scale + self.offset_y)
+        self.ax.set_xlim(-1 * self.scale / 2 + self.offset_x, self.scale / 2 + self.offset_x)
+        self.ax.set_ylim(-1 * self.scale / 2 + self.offset_y, self.scale / 2 + self.offset_y)
         self.ax.set_aspect('equal')
         yticklabels = self.ax.yaxis.get_major_ticks()
         yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
@@ -170,8 +170,9 @@ class GraphWindow:
         label = tk.Label(frame_scale, text='x Verschiebung:')
         label.pack(side='left')
 
-        ent_xoffset = tk.Entry(frame_scale)
+        ent_xoffset = tk.Entry(frame_scale, textvariable=self.offset_x_Var)
         ent_xoffset.pack(side="left")
+        ent_xoffset.bind("<<Return>>", self.enter_xoffset)
 
         btn_increment_xoffset = tk.Button(frame_scale, text='+', command=lambda: self.increment_xoffset(10))
         btn_increment_xoffset.pack(side='left')
@@ -185,8 +186,9 @@ class GraphWindow:
         label = tk.Label(frame_scale, text='y-Verschiebung:')
         label.pack(side='left')
 
-        ent_yoffset = tk.Entry(frame_scale)
+        ent_yoffset = tk.Entry(frame_scale, textvariable=self.offset_y_Var)
         ent_yoffset.pack(side='left')
+        ent_yoffset.bind("<<Return>>", self.enter_yoffset)
 
         btn_increment_yoffset = tk.Button(frame_scale, text='+', command=lambda: self.increment_yoffset(10))
         btn_increment_yoffset.pack(side='left')
@@ -281,7 +283,8 @@ class GraphWindow:
         self.update_canvas()
 
     def enter_yoffset(self):
-        pass
+        offset_y_str = self.offset_y_Var.get()
+        self.offset_y = float(offset_y_str)
 
     def increment_xoffset(self, amount):
         self.offset_x += amount
@@ -294,7 +297,8 @@ class GraphWindow:
         self.update_canvas()
 
     def enter_xoffset(self):
-        pass
+        offset_x_str = self.offset_x_Var.get()
+        self.offset_x = float(offset_x_str)
 #   end
 
     def display_func_info(self, event):
