@@ -49,6 +49,8 @@ class GraphWindow:
                                   command=lambda: self.open_function_entry(fun.TermType.SCHNITTPUNKT))
         funktion_menu.add_command(label='Trigonometrische',
                                   command=lambda: self.open_function_entry(fun.TermType.TRIGONOMETRISCH))
+        funktion_menu.add_command(label="Exponentiele Funktion",
+                                  command=lambda: self.open_function_entry(fun.TermType.EXPONENTIEL))
         menubar.add_cascade(
             label='neue Funktion',
             menu=funktion_menu
@@ -95,11 +97,17 @@ class GraphWindow:
         frame_list = tk.Frame(self.frame_list_info)
         frame_list.pack(side='top')
 
+        menu = tk.Menu(self.root, tearoff=0)
+        menu.add_command(label="Entfehrnen")
+        menu.add_command(label="Bearbeiten")
+        menu.add_command(label="Integral berechen")
+
         label = tk.Label(frame_list, text='Funktionen')
         label.pack(side='top')
         self.list_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
         self.list_functions.pack(side="left", fill="both")
-        self.list_functions.bind('<<ListboxSelect>>', self.display_func_info)
+        self.list_functions.bind('<<ListboxSelect>>', self.display_func_info, add='+')
+        self.list_functions.bind('<<Button-3>>', lambda x: 1+1, add='+')
 
         scrollbar = tk.Scrollbar(frame_list, orient='vertical')
         scrollbar.config(command=self.list_functions.yview)
@@ -225,8 +233,11 @@ class GraphWindow:
         self.ax.patch.set_linewidth(1)
         self.ax.set_xlim(graphMinX, graphMaxX)
         self.ax.set_ylim(graphMinY, graphMaxY)
+        xticklabels = self.ax.xaxis.get_major_ticks()
+        xticklabels[round((len(xticklabels)-1) / 2)].label.set_visible(False)
         yticklabels = self.ax.yaxis.get_major_ticks()
         yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
+
         x_vals = np.linspace(graphMinX, graphMaxX, num=100)
         for function in self.functionList:
             y_vals = function.arr_calc(x_vals, fun.FunctionDerivative.ORIGINAL)
@@ -388,24 +399,10 @@ class GraphWindow:
                                     f'WP{fun.subscript_of(i)}')
             self.canvas.draw()
 
-
-            '''
-            null_list_len = len(nullstellen_list)
-            for j in range(int(null_list_len / 10) + 1):
-                print("j", j)
-                if null_list_len % 10 == 0:
-                    rangevar = 10
-                else:
-                    rangevar = null_list_len % 10
-                print("rangevar", rangevar)
-                for i in range(rangevar):
-                    print("i + 1 + j * 10", i + 1 + j * 10)
-                    print("nullstellen_list[i]", nullstellen_list[i])
-                    print("i", i)
-                    nullstellen_str += f"N{fun.subscript_of(i + 1 + j *10)}({nullstellen_list[i]}|0) "
-                label = tk.Label(self.frame_info, text=nullstellen_str)
-                label.grid(row=j + 3)
-                '''
+    def popup(self, event):
+        self.list_functions.selection_clear(0, tk.END)
+        self.list_functions.selection_set(self.list_functions.nearest(event.y))
+        self.list_functions.activate(self.list_functions.nearest(event.y))
 
 
 

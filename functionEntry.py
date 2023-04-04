@@ -3,6 +3,7 @@ import tkinter
 import tkinter as tk
 import tkinter.messagebox as msgbox
 from tkinter import ttk
+from tkinter.font import Font
 
 from Function import Function
 from Function import TermType
@@ -82,6 +83,14 @@ class FunctionEntry:
             entry = tk.Entry(frame, width=5)
             entry.pack(side='left')
             self.entry_arr.append(entry)
+
+        elif term_type == TermType.EXPONENTIEL:
+            entry = tk.Entry(frame, width=5)
+            entry.pack(side='left')
+            self.entry_arr.append(entry)
+
+            label = tk.Label(frame, text='^x')
+            label.pack(side='left')
 
 
 

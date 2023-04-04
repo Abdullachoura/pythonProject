@@ -16,6 +16,7 @@ class TermType(Enum):
     GANZ_RATIONAL = 1
     SCHNITTPUNKT = 2
     TRIGONOMETRISCH = 3
+    EXPONENTIEL = 4
 
 class TrigonometrischerOperator(Enum):
     COS = 1
@@ -114,6 +115,8 @@ class Function:
             self.term = SchnittpunktTerm(*args)
         elif functype == TermType.TRIGONOMETRISCH:
             self.term = TrigonomischerTerm(args[0], *args[1:])
+        elif functype == TermType.EXPONENTIEL:
+            self.term = ExponentielerTerm(*args)
 
     def calc_original(self, x):
         return self.term.calc_original(x)
@@ -202,6 +205,8 @@ class Function:
     def calc_extrempunkte(self, min, max):
         if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 3:
             raise ValueError("term ist linear und hat keine Extrempunkte")
+        if isinstance(self.term.deriv1, types.NoneType):
+
         ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
         print("ableitung1_nullstellen", ableitung1_nullstellen)
         extremwerte = [nullstelle[0] for nullstelle in ableitung1_nullstellen]
@@ -686,13 +691,13 @@ class ExponentielerTerm:
         return self.original[0]  ** x
 
     def calc_deriv1(self, x):
-        return (self.deriv1[0] * x) ** (x - 1)
+        return None
 
     def calc_deriv2(self, x):
-        return (self.deriv2[0] * x * (x - 1)) ** (x - 2)
+        return None
 
     def calc_deriv3(self, x):
-        return (self.deriv3[0] * x * (x - 1) * (x - 2)) ** (x - 3)
+        return None
 
     def calc_aufleitung(self, x):
         return (self.aufleitung[0] / x) ** (x + 1)
