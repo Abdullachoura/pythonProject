@@ -10,6 +10,7 @@ class FunctionDerivative(Enum):
     DERIVATIVE_1=2
     DERIVATIVE_2=3
     DERIVATIVE_3=4
+    AUFLEITUNG=5
 
 class TermType(Enum):
     GANZ_RATIONAL = 1
@@ -226,10 +227,6 @@ class Function:
             wendepunkte.append((wendepunktwerte[i], wendepunkt_y[i]))
         return wendepunkte
 
-
-
-
-
     def deriv1_as_str(self):
         return self.term.deriv1_as_str()
 
@@ -250,11 +247,19 @@ class GanzrationaleTerm:
     def __init__(self, *args):
         print("ganzrationale", args)
         self.original = []
+        self.aufleitung = []
         self.deriv1 = []
         self.deriv2 = []
         self.deriv3 = []
         for val in args:
             self.original.append(val)
+
+        self.aufleitung.append(0)
+        for i in range(1, len(self.original)):
+            self.aufleitung.append(self.original[i] / i)
+
+        print("original", self.original)
+        print("aufleitung", self.aufleitung)
 
         for i in range(len(self.original)):
             if i == len(self.original)-1: continue
@@ -292,7 +297,13 @@ class GanzrationaleTerm:
             to_return = self.deriv3[i] * x ** float(i)
         return to_return
 
-    def calc_for_range(self, fun_type: FunctionDerivative, min, max, inc):
+    def calc_aufleitung(self, x):
+        to_return = 0
+        for i in range(len(self.aufleitung)):
+            to_return = self.aufleitung[i] * x ** float(i)
+        return to_return
+
+    def calc_for_range(self, deriv_type: FunctionDerivative, min, max, inc):
         '''
         gibt ergebnisse als array zurück
         :param: fun: calc funktion von classe Funktion
@@ -301,29 +312,33 @@ class GanzrationaleTerm:
          inc: schritt größe\n
         :return: array der ergebnisse
         '''
-        to_return_arr = []
+        to_return = []
         for x in range(min, max, inc):
-            if fun_type == FunctionDerivative.ORIGINAL:
-                to_return_arr.append(self.calc_original(x))
-            elif fun_type == FunctionDerivative.DERIVATIVE_1:
-                to_return_arr.append(self.calc_deriv1(x))
-            elif fun_type == FunctionDerivative.DERIVATIVE_2:
-                to_return_arr.append(self.calc_deriv2(x))
-            elif fun_type == FunctionDerivative.DERIVATIVE_3:
-                to_return_arr.append(self.calc_deriv3(x))
-        return to_return_arr
+            if deriv_type == FunctionDerivative.ORIGINAL:
+                to_return.append(self.calc_original(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
+                to_return.append(self.calc_deriv1(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
+                to_return.append(self.calc_deriv2(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
+                to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
+        return to_return
 
-    def arr_calc(self, x_arr, func_type: FunctionDerivative):
+    def arr_calc(self, x_arr, deriv_type: FunctionDerivative):
         to_return = []
         for x in x_arr:
-            if func_type == FunctionDerivative.ORIGINAL:
+            if deriv_type == FunctionDerivative.ORIGINAL:
                 to_return.append(self.calc_original(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_1:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
                 to_return.append(self.calc_deriv1(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_2:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
                 to_return.append(self.calc_deriv2(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_3:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
                 to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
         return to_return
 
     def deriv1_as_str(self):
@@ -429,8 +444,10 @@ class SchnittpunktTerm:
 
     def __init__(self, *args):
         self.original = []
+        self.aufleitung = []
         for val in args:
             self.original.append(val)
+        self.aufleitung = [self.original[0] / 3, self.original[1], self.original[2]]
         self.deriv1 = [self.original[0]*2, self.original[1]*self.original[0]*2]
         self.deriv2 = [self.deriv1[0]]
 
@@ -447,30 +464,37 @@ class SchnittpunktTerm:
     def calc_deriv3(self, x):
         return 0
 
-    def calc_for_range(self, functionDeriv: FunctionDerivative, start, end, inc):
+    def calc_aufleitung(self, x):
+        return self.aufleitung[0] * (x + self.aufleitung[1])**2 + self.aufleitung[2] * x
+
+    def calc_for_range(self, deriv_type: FunctionDerivative, start, end, inc):
         to_return = []
         for x in range(start, end, inc):
-            if functionDeriv == FunctionDerivative.ORIGINAL:
+            if deriv_type == FunctionDerivative.ORIGINAL:
                 to_return.append(self.calc_original(x))
-            elif functionDeriv == FunctionDerivative.DERIVATIVE_1:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
                 to_return.append(self.calc_deriv1(x))
-            elif functionDeriv == FunctionDerivative.DERIVATIVE_2:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
                 to_return.append(self.calc_deriv2(x))
-            elif functionDeriv == FunctionDerivative.DERIVATIVE_3:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
                 to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
         return to_return
 
-    def arr_calc(self, x_arr, func_type : FunctionDerivative):
+    def arr_calc(self, x_arr, deriv_type : FunctionDerivative):
         to_return = []
         for x in x_arr:
-            if func_type == FunctionDerivative.ORIGINAL:
+            if deriv_type == FunctionDerivative.ORIGINAL:
                 to_return.append(self.calc_original(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_1:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
                 to_return.append(self.calc_deriv1(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_2:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
                 to_return.append(self.calc_deriv2(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_3:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
                 to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
         return to_return
 
     def deriv1_as_str(self):
@@ -508,11 +532,10 @@ class TrigonomischerTerm:
         self.original = []
         for val in args:
             self.original.append(val)
+        self.aufleitung = self.original.copy()
         self.deriv1 = self.original.copy()
         self.deriv2 = self.original.copy()
         self.deriv3 = self.original.copy()
-
-
 
     def calc_original(self, x):
         to_return = 0
@@ -544,32 +567,44 @@ class TrigonomischerTerm:
             to_return = self.deriv2[0] * -1 * np.cos((np.pi * 2) / self.deriv2[2] * x + self.deriv2[1])
         elif self.trigOp == TrigonometrischerOperator.COS:
             to_return = self.deriv2[0] * np.sin((np.pi * 2) / self.deriv2[2] * x + self.deriv2[1])
-        return  to_return
-
-    def calc_for_range(self, functionDeriv: FunctionDerivative, start, end, inc):
-        to_return = []
-        for x in range(start, end, inc):
-            if functionDeriv == FunctionDerivative.ORIGINAL:
-                to_return.append(self.calc_original(x))
-            elif functionDeriv == FunctionDerivative.DERIVATIVE_1:
-                to_return.append(self.calc_deriv1(x))
-            elif functionDeriv == FunctionDerivative.DERIVATIVE_2:
-                to_return.append(self.calc_deriv2(x))
-            elif functionDeriv == FunctionDerivative.DERIVATIVE_3:
-                to_return.append(self.calc_deriv3(x))
         return to_return
 
-    def arr_calc(self, x_arr, func_type : FunctionDerivative):
+    def calc_aufleitung(self, x):
+        to_return = 0
+        if self.trigOp == TrigonometrischerOperator.SIN:
+            to_return = -1 * self.aufleitung[0] * np.cos((np.pi * 2) / self.aufleitung[2] * x + self.aufleitung[1])
+        elif self.trigOp == TrigonometrischerOperator.COS:
+            to_return = self.aufleitung[0] * np.sin((np.pi / 2) * self.aufleitung[2] * x + self.aufleitung[1])
+        return to_return
+
+    def calc_for_range(self, deriv_type: FunctionDerivative, start, end, inc):
+        to_return = []
+        for x in range(start, end, inc):
+            if deriv_type == FunctionDerivative.ORIGINAL:
+                to_return.append(self.calc_original(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
+                to_return.append(self.calc_deriv1(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
+                to_return.append(self.calc_deriv2(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
+                to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
+        return to_return
+
+    def arr_calc(self, x_arr, deriv_type: FunctionDerivative):
         to_return = []
         for x in x_arr:
-            if func_type == FunctionDerivative.ORIGINAL:
+            if deriv_type == FunctionDerivative.ORIGINAL:
                 to_return.append(self.calc_original(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_1:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
                 to_return.append(self.calc_deriv1(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_2:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
                 to_return.append(self.calc_deriv2(x))
-            elif func_type == FunctionDerivative.DERIVATIVE_3:
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
                 to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
         return to_return
 
     def deriv1_as_str(self):
@@ -637,3 +672,72 @@ class TrigonomischerTerm:
             toReturn += f"+{self.original[1]})"
         toReturn += f' | T={self.original[2]}'
         return toReturn
+
+class ExponentielerTerm:
+
+    def __init__(self, *args):
+        self.original = [args[0]]
+        self.aufleitung = self.original.copy()
+        self.deriv1 = self.original.copy()
+        self.deriv2 = self.original.copy()
+        self.deriv3 = self.original.copy()
+
+    def calc_original(self, x):
+        return self.original[0]  ** x
+
+    def calc_deriv1(self, x):
+        return (self.deriv1[0] * x) ** (x - 1)
+
+    def calc_deriv2(self, x):
+        return (self.deriv2[0] * x * (x - 1)) ** (x - 2)
+
+    def calc_deriv3(self, x):
+        return (self.deriv3[0] * x * (x - 1) * (x - 2)) ** (x - 3)
+
+    def calc_aufleitung(self, x):
+        return (self.aufleitung[0] / x) ** (x + 1)
+
+    def calc_for_range(self, deriv_type: FunctionDerivative, start, end, inc):
+        to_return = []
+        for x in range(start, end, inc):
+            if deriv_type == FunctionDerivative.ORIGINAL:
+                to_return.append(self.calc_original(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
+                to_return.append(self.calc_deriv1(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
+                to_return.append(self.calc_deriv2(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
+                to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
+        return to_return
+
+    def arr_calc(self, x_arr, deriv_type: FunctionDerivative):
+        to_return = []
+        for x in x_arr:
+            if deriv_type == FunctionDerivative.ORIGINAL:
+                to_return.append(self.calc_original(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_1:
+                to_return.append(self.calc_deriv1(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_2:
+                to_return.append(self.calc_deriv2(x))
+            elif deriv_type == FunctionDerivative.DERIVATIVE_3:
+                to_return.append(self.calc_deriv3(x))
+            elif deriv_type == FunctionDerivative.AUFLEITUNG:
+                to_return.append(self.calc_aufleitung(x))
+        return to_return
+
+    def deriv1_as_str(self):
+        return f'x * {self.deriv1[0]}^(x - 1)'
+
+    def deriv2_as_str(self):
+        return f'(x{superscript_of(2)}-1x) * {self.deriv2[0]}^(x - 2)'
+
+    def deriv3_as_str(self):
+        return f'(x³ - 3x² + 2x) * {self.deriv3[0]} + (x - 3)'
+
+    def aufleitung_as_str(self):
+        return f'({self.aufleitung[0]} / x) ** (x + 1)'
+
+    def __str__(self):
+        return f'{self.original[0]} ** x'
