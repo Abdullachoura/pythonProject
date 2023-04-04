@@ -30,9 +30,14 @@ class GraphWindow:
         self.root = tk.Tk()
         self.scaleVar = tk.StringVar()
         self.scaleVar.set("10")
+        self.offset_y_Var = tk.StringVar()
+        self.offset_y_Var.set("0")
+        self.offset_x_Var = tk.StringVar()
+        self.offset_x_Var.set("0")
         self.funcListVar = tk.Variable(value=())
         self.nullstellenListVar = tk.Variable(value=())
         self.extrempunkteListVar = tk.Variable(value=())
+        self.wendepunkteListVar = tk.Variable(value=())
 
         self.root.title('Functional')
 
@@ -62,15 +67,29 @@ class GraphWindow:
         yticklabels = self.ax.yaxis.get_major_ticks()
         yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
 
-        funcFrame = tk.Frame(self.root)
-        funcFrame.pack(side="top", fill='both', expand=1)
+        func_info_Frame = tk.Frame(self.root)
+        func_info_Frame.pack(side='top', fill='both', expand=1)
 
+        funcFrame = tk.Frame(func_info_Frame)
+        funcFrame.pack(side="right", fill='both')
+
+        button = tk.Button(funcFrame, text=chr(0x21E7), command=lambda: self.increment_yoffset(self.scale))
+        button.pack(side='top', fill='x')
+
+        button = tk.Button(funcFrame, text=chr(0x21E9), command=lambda: self.decrement_yoffset(self.scale))
+        button.pack(side='bottom', fill='x')
+
+        button = tk.Button(funcFrame, text=chr(0x21E6), command=lambda: self.decrement_xoffset(self.scale))
+        button.pack(side='left', fill='y')
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=funcFrame)
         self.canvas.draw()
-        self.canvas.get_tk_widget().pack(fill='both', expand=1, side="right")
+        self.canvas.get_tk_widget().pack(fill='both', expand=1, side="left")
 
-        self.frame_list_info = tk.Frame(funcFrame, width=50)
+        button = tk.Button(funcFrame, text=chr(0x21E8), command=lambda: self.increment_xoffset(self.scale))
+        button.pack(side='right', fill='y')
+
+        self.frame_list_info = tk.Frame(func_info_Frame, width=50)
         self.frame_list_info.pack(side="left", fill='y')
 
         frame_list = tk.Frame(self.frame_list_info)
@@ -121,7 +140,7 @@ class GraphWindow:
         frame_wendestellen_list.pack(side='left')
         label = tk.Label(frame_wendestellen_list, text='Wendestellen')
         label.pack(side='top')
-        list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.extrempunkteListVar)
+        list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.wendepunkteListVar)
         list_wendestellen.pack(side='left', fill='both')
         scrollbar = tk.Scrollbar(frame_wendestellen_list, orient='vertical')
         scrollbar.config(command=list_wendestellen.yview)
@@ -135,15 +154,47 @@ class GraphWindow:
         frame_scale = tk.Frame(master=self.root)
         frame_scale.pack(side="bottom", fill='x')
 
-        ent_scale = tk.Entry(frame_scale, textvariable=self.scaleVar)
-        ent_scale.bind("<Return>", func=self.enter_scale)
-        ent_scale.pack(side="right")
+        btn_decrement_scale = tk.Button(frame_scale, text='-', command=self.decrement_scale)
+        btn_decrement_scale.pack(side="right")
 
         btn_increment_scale = tk.Button(frame_scale, text='+', command=self.increment_scale)
         btn_increment_scale.pack(side="right")
 
-        btn_decrement_scale = tk.Button(frame_scale, text='-', command=self.decrement_scale)
-        btn_decrement_scale.pack(side="right")
+        ent_scale = tk.Entry(frame_scale, textvariable=self.scaleVar)
+        ent_scale.bind("<Return>", func=self.enter_scale)
+        ent_scale.pack(side="right")
+
+        label = tk.Label(frame_scale, text='Skallierung:')
+        label.pack(side='right')
+
+        label = tk.Label(frame_scale, text='x Verschiebung:')
+        label.pack(side='left')
+
+        ent_xoffset = tk.Entry(frame_scale)
+        ent_xoffset.pack(side="left")
+
+        btn_increment_xoffset = tk.Button(frame_scale, text='+', command=lambda: self.increment_xoffset(10))
+        btn_increment_xoffset.pack(side='left')
+
+        btn_decrement_xoffset = tk.Button(frame_scale, text='-', command=lambda: self.decrement_xoffset(10))
+        btn_decrement_xoffset.pack(side='left')
+
+        label = tk.Label(frame_scale)
+        label.pack(side='left', padx=10)
+
+        label = tk.Label(frame_scale, text='y-Verschiebung:')
+        label.pack(side='left')
+
+        ent_yoffset = tk.Entry(frame_scale)
+        ent_yoffset.pack(side='left')
+
+        btn_increment_yoffset = tk.Button(frame_scale, text='+', command=lambda: self.increment_yoffset(10))
+        btn_increment_yoffset.pack(side='left')
+
+        btn_decrement_yoffset = tk.Button(frame_scale, text='-', command=lambda: self.decrement_yoffset(10))
+        btn_decrement_yoffset.pack(side='left')
+
+
         self.root.mainloop()
 
 
@@ -158,10 +209,10 @@ class GraphWindow:
         self.funcListVar.set(list)
 
     def update_canvas(self):
-        graphMinX = -1 * self.scale + self.offset_x
-        graphMaxX = self.scale + self.offset_x
-        graphMinY = -1 * self.scale + self.offset_y
-        graphMaxY = self.scale + self.offset_y
+        graphMinX = -1 * self.scale / 2 + self.offset_x
+        graphMaxX = self.scale / 2 + self.offset_x
+        graphMinY = -1 * self.scale / 2 + self.offset_y
+        graphMaxY = self.scale / 2 + self.offset_y
         self.ax.clear()
         self.ax.grid(True, color='grey')
         self.ax.spines['left'].set_position('center')
@@ -218,6 +269,32 @@ class GraphWindow:
             self.scaleVar.set(str(self.scale))
         except Exception as e:
             print(e.args)
+
+    def increment_yoffset(self, amount):
+        self.offset_y += amount
+        self.offset_y_Var.set(str(self.offset_y))
+        self.update_canvas()
+
+    def decrement_yoffset(self, amount):
+        self.offset_y -= amount
+        self.offset_y_Var.set(str(self.offset_y))
+        self.update_canvas()
+
+    def enter_yoffset(self):
+        pass
+
+    def increment_xoffset(self, amount):
+        self.offset_x += amount
+        self.offset_x_Var.set(str(self.offset_y))
+        self.update_canvas()
+
+    def decrement_xoffset(self, amount):
+        self.offset_x -= amount
+        self.offset_x_Var.set(str(self.offset_y))
+        self.update_canvas()
+
+    def enter_xoffset(self):
+        pass
 #   end
 
     def display_func_info(self, event):
@@ -243,7 +320,7 @@ class GraphWindow:
 
         nullstellen_str = ""
         nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
-                                                 self.scale * -1, self.scale)
+                                                 self.scale * -1 + self.offset_x, self.scale + self.offset_x)
         if isinstance(nullstellen_list, types.NoneType):
             label = tk.Label(self.frame_ableitungen, text="keine Nullstellen innerhalb d. Kordinaten systems")
             label.grid(row=3)
@@ -258,7 +335,7 @@ class GraphWindow:
                 self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
                              f'N{fun.subscript_of(i + 1)}')
 
-            extrempunkte_list = func.calc_extrempunkte(self.scale * -1, self.scale)
+            extrempunkte_list = func.calc_extrempunkte(self.scale / 2 * -1 + self.offset_x, self.scale + self.offset_x)
             if isinstance(extrempunkte_list, types.NoneType):
                 label = tk.Label(self.frame_ableitungen, text="keine extrempunkte innerhalb d. Kordinaten systems")
                 label.grid(row=3)
@@ -292,6 +369,19 @@ class GraphWindow:
                                      f'HP{fun.subscript_of(hp_i)}')
                         hp_i += 1
 
+            wendepunkte_list = func.calc_wendepunkte(self.scale / 2 * -1 + self.offset_x, self.scale / 2 + self.offset_x)
+            if isinstance(wendepunkte_list, types.NoneType):
+                label = tk.Label(self.frame_ableitungen, text="keine wendepunkte innerhalb d. Kordinaten systems")
+                label.grid(row=3)
+            else:
+                wendepunkte = []
+                for i in range(len(wendepunkte_list)):
+                    wendepunkte.append(f"WP{fun.subscript_of(i)}{wendepunkte_list[i]}")
+                self.wendepunkteListVar.set(wendepunkte)
+                for i in range(len(wendepunkte_list)):
+                    self.ax.plot(extrempunkte_list[i][0], extrempunkte_list[i][1], 'bo')
+                    self.ax.text(extrempunkte_list[i][0] + 0.02, extrempunkte_list[i][1] + 0.02,
+                                    f'WP{fun.subscript_of(i)}')
             self.canvas.draw()
 
 

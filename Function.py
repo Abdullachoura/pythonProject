@@ -139,7 +139,8 @@ class Function:
             return_arr_length = len(self.term.original) - 1
         if isinstance(self.term, SchnittpunktTerm):
             return_arr_length = 2
-            if np.sign(self.term.original[0]) == np.sign(self.term.original[2]):
+            if np.sign(self.term.original[0]) == np.sign(self.term.original[2]) \
+                    and funcDer == FunctionDerivative.ORIGINAL:
                 return []
         if isinstance(self.term, TrigonomischerTerm):
             to_use_arr = []
@@ -163,14 +164,9 @@ class Function:
                     elif funcDer == FunctionDerivative.DERIVATIVE_2:
                         val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
                 if min < val < max:
-                    print("append val:", val)
+                    val = round(val, 3)
                     arr_to_return.append((val, 0))
                 i += 1
-            print("trigop", self.term.trigOp)
-            print("i", i)
-            print("arr_to_return: ", arr_to_return)
-            print("T", self.term.original[2])
-            print("val", val)
         else:
             arr_to_return = []
             for x in range(int(min), int(max)):
@@ -182,6 +178,7 @@ class Function:
                         val = newton_verfahren(self.calc_original, self.calc_deriv1, val, 0.001)
                     elif funcDer == FunctionDerivative.DERIVATIVE_1:
                         val = newton_verfahren(self.calc_deriv1, self.calc_deriv2, val, 0.001)
+                        print("val", val)
                     elif funcDer == FunctionDerivative.DERIVATIVE_2:
                         val = newton_verfahren(self.calc_deriv2, self.calc_deriv3, val, 0.001)
                 except ZeroDivisionError:
@@ -202,7 +199,7 @@ class Function:
         return arr_to_return
 
     def calc_extrempunkte(self, min, max):
-        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 2:
+        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 3:
             raise ValueError("term ist linear und hat keine Extrempunkte")
         ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
         print("ableitung1_nullstellen", ableitung1_nullstellen)
@@ -215,6 +212,21 @@ class Function:
             extremstellen.append((extremwerte[i], extremstellen_y[i]))
         print("extremstellen", extremstellen)
         return extremstellen
+
+    def calc_wendepunkte(self, min, max):
+        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 4:
+            raise ValueError("term ist unterdem 3. Grad und hat somit keine Wendepunkte")
+        if self.calc_deriv3(1) == 0:
+            return None
+        ableitung2_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_2, min, max)
+        wendepunktwerte = [nullstelle[0] for nullstelle in ableitung2_nullstellen]
+        wendepunkt_y = self.arr_calc(wendepunktwerte, FunctionDerivative.ORIGINAL)
+        wendepunkte = []
+        for i in range(len(wendepunkt_y)):
+            wendepunkte.append((wendepunktwerte[i], wendepunkt_y[i]))
+        return wendepunkte
+
+
 
 
 
