@@ -1,4 +1,4 @@
-
+import time
 import tkinter as tk
 import types
 
@@ -31,6 +31,7 @@ class GraphWindow:
         self.extremstellen_list = []
         self.wendestellen_list = []
         self.selected_function = None
+        self.selected_index = None
         self.root = tk.Tk()
         self.scaleVar = tk.StringVar()
         self.scaleVar.set("20")
@@ -101,17 +102,17 @@ class GraphWindow:
         frame_list = tk.Frame(self.frame_list_info)
         frame_list.pack(side='top')
 
-        menu = tk.Menu(self.root, tearoff=0)
-        menu.add_command(label="Entfehrnen")
-        menu.add_command(label="Bearbeiten")
-        menu.add_command(label="Integral berechen")
+        self.list_functions_contextmenu = tk.Menu(self.root, tearoff=0)
+        self.list_functions_contextmenu.add_command(label="Entfehrnen")
+        self.list_functions_contextmenu.add_command(label="Bearbeiten", command=self.change_function_parameters)
+        self.list_functions_contextmenu.add_command(label="Integral berechen")
 
         label = tk.Label(frame_list, text='Funktionen')
         label.pack(side='top')
         self.list_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
         self.list_functions.pack(side="left", fill="both")
         self.list_functions.bind('<<ListboxSelect>>', self.functionlist_item_selected, add='+')
-        self.list_functions.bind('<<Button-3>>', lambda x: 1+1, add='+')
+        self.list_functions.bind('<Button-3>', self.popup, add='+')
 
         scrollbar = tk.Scrollbar(frame_list, orient='vertical')
         scrollbar.config(command=self.list_functions.yview)
@@ -439,6 +440,7 @@ class GraphWindow:
             self.wendestellen_label.config(text=ve.args[0])
 
     def functionlist_item_selected(self, event):
+        self.list_functions_contextmenu.unpost()
         index = self.list_functions.curselection()[0]
         func = self.functionList[index]
         self.selected_function = (index, func)
@@ -449,7 +451,11 @@ class GraphWindow:
         self.list_functions.selection_clear(0, tk.END)
         self.list_functions.selection_set(self.list_functions.nearest(event.y))
         self.list_functions.activate(self.list_functions.nearest(event.y))
-
+        self.selected_index = self.list_functions.curselection()[0]
+        self.selected_function = self.functionList[self.selected_index]
+        self.list_functions_contextmenu.post(self.root.winfo_pointerx(), self.root.winfo_pointery())
+        self.list_functions.bind("<FocusOut>", lambda x: self.list_functions_contextmenu.unpost(), add='+')
+        self.list_functions_contextmenu.grab_release()
 
 
 
@@ -460,15 +466,34 @@ class GraphWindow:
             self.update_window()
 
 #   funktions eingabe
-    def open_function_entry(self, term_type: fun.TermType, *args):
-        fun_entry_win = funent.FunctionEntry(term_type, *args)
+    def open_function_entry(self, term_type: fun.TermType, grad=0):
+        fun_entry_win = funent.FunctionEntry(term_type, grad=grad)
         fun_entry_win.root.bind("<Destroy>", lambda x: self.append_Function(fun_entry_win.func, fun_entry_win.root, x))
         fun_entry_win.root.mainloop()
         self.functionList.append(fun_entry_win.func)
 
-    def rational_function_button_event(self, root:tk.Tk,  termType:fun.TermType, *args):
+    def change_function_parameters(self):
+        if self.selected_function.termtype == fun.TermType.GANZ_RATIONAL:
+            func_entry = funent.FunctionEntry(self.selected_function.termtype, self.selected_function.term.original,
+                                              grad=len(self.selected_function.term.original) - 1)
+        else:
+            func_Entry = funent.FunctionEntry(self.selected_function.termtype, self.selected_function.term.original)
+        func_Entry.root.mainloop()
+        self.functionList[self.selected_index] = func_Entry.func
+
+
+
+
+    def remove_function(self):
+        pass
+
+    def open_integral_calc(self):
+        pass
+
+
+    def rational_function_button_event(self, root:tk.Tk,  termType:fun.TermType, grad):
         root.destroy()
-        self.open_function_entry(termType, *args)
+        self.open_function_entry(termType, grad)
 
     def rational_function(self):
         root = tk.Tk()

@@ -108,14 +108,15 @@ def round(x, prec):
 
 class Function:
 
-    def __init__(self, functype: TermType, *args):
-        if functype == TermType.GANZ_RATIONAL:
+    def __init__(self, termtype: TermType, *args):
+        self.termtype = termtype
+        if termtype == TermType.GANZ_RATIONAL:
             self.term = GanzrationaleTerm(*args)
-        elif functype == TermType.SCHNITTPUNKT:
+        elif termtype == TermType.SCHNITTPUNKT:
             self.term = SchnittpunktTerm(*args)
-        elif functype == TermType.TRIGONOMETRISCH:
+        elif termtype == TermType.TRIGONOMETRISCH:
             self.term = TrigonomischerTerm(args[0], *args[1:])
-        elif functype == TermType.EXPONENTIEL:
+        elif termtype == TermType.EXPONENTIEL:
             self.term = ExponentielerTerm(*args)
 
     def calc_original(self, x):
@@ -270,8 +271,8 @@ class GanzrationaleTerm:
             self.original.append(val)
 
         self.aufleitung.append(0)
-        for i in range(1, len(self.original)):
-            self.aufleitung.append(self.original[i] / i)
+        for i in range(len(self.original)):
+            self.aufleitung.append(self.original[i] / (i+1))
 
         print("original", self.original)
         print("aufleitung", self.aufleitung)
