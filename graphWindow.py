@@ -249,28 +249,30 @@ class GraphWindow:
             y_vals = self.functionList[i].arr_calc(x_vals, fun.FunctionDerivative.ORIGINAL)
             self.ax.plot(x_vals, y_vals, label=f'{chr(ord("f") + i)}')
 
-        for i in range(len(self.nullstellen_list)):
-            self.ax.plot(self.nullstellen_list[i][0], 0, 'bo')
-            self.ax.text(self.nullstellen_list[i][0] + 0.02, self.nullstellen_list[i][1] + 0.02,
-                         f'N{fun.subscript_of(i + 1)}')
+        if isinstance(self.selected_function, fun.Function):
+            for i in range(len(self.nullstellen_list)):
+                self.ax.plot(self.nullstellen_list[i][0], 0, 'bo')
+                self.ax.text(self.nullstellen_list[i][0] + 0.02, self.nullstellen_list[i][1] + 0.02,
+                             f'N{fun.subscript_of(i + 1)}')
 
-        tp_i = 1
-        hp_i = 1
-        for i in range(len(self.extremstellen_list)):
-            if self.extremstellen_list[i][0] > 0:
-                self.ax.plot(self.extremstellen_list[i][1][0], self.extremstellen_list[i][1][1], 'bo')
-                self.ax.text(self.extremstellen_list[i][1][0] + 0.02, self.extremstellen_list[i][1][1] + 0.02,
-                             f'TP{fun.subscript_of(tp_i)}')
-                tp_i += 1
-            elif self.extremstellen_list[i][0] < 0:
-                self.ax.plot(self.extremstellen_list[i][1][0], self.extremstellen_list[i][1][1], 'bo')
-                self.ax.text(self.extremstellen_list[i][1][0] + 0.02, self.extremstellen_list[i][1][1] + 0.02,
-                             f'HP{fun.subscript_of(hp_i)}')
-                hp_i += 1
-        for i in range(len(self.wendestellen_list)):
-            self.ax.plot(self.wendestellen_list[i][0], self.wendestellen_list[i][1], 'bo')
-            self.ax.text(self.wendestellen_list[i][0] + 0.02, self.wendestellen_list[i][1] + 0.02,
-                         f'WP{fun.subscript_of(i + 1)}')
+            tp_i = 1
+            hp_i = 1
+            for i in range(len(self.extremstellen_list)):
+                if self.extremstellen_list[i][0] > 0:
+                    self.ax.plot(self.extremstellen_list[i][1][0], self.extremstellen_list[i][1][1], 'bo')
+                    self.ax.text(self.extremstellen_list[i][1][0] + 0.02, self.extremstellen_list[i][1][1] + 0.02,
+                                 f'TP{fun.subscript_of(tp_i)}')
+                    tp_i += 1
+                elif self.extremstellen_list[i][0] < 0:
+                    self.ax.plot(self.extremstellen_list[i][1][0], self.extremstellen_list[i][1][1], 'bo')
+                    self.ax.text(self.extremstellen_list[i][1][0] + 0.02, self.extremstellen_list[i][1][1] + 0.02,
+                                 f'HP{fun.subscript_of(hp_i)}')
+                    hp_i += 1
+            if not isinstance(self.selected_function.term, fun.TrigonomischerTerm):
+                for i in range(len(self.wendestellen_list)):
+                    self.ax.plot(self.wendestellen_list[i][0], self.wendestellen_list[i][1], 'bo')
+                    self.ax.text(self.wendestellen_list[i][0] + 0.02, self.wendestellen_list[i][1] + 0.02,
+                                 f'WP{fun.subscript_of(i + 1)}')
         self.ax.legend()
         self.canvas.draw()
 
@@ -278,7 +280,7 @@ class GraphWindow:
     def update_window(self):
         self.update_list()
         if not isinstance(self.selected_function, types.NoneType):
-            self.update_func_info_frames(self.selected_function[1], self.selected_function[0])
+            self.update_func_info_frames(self.selected_function, self.selected_index)
         self.update_canvas()
 #   end
 
@@ -347,9 +349,9 @@ class GraphWindow:
     def update_func_info_frames(self, func, index):
         if isinstance(func, types.NoneType) or isinstance(index, types.NoneType):
             return
-        self.nullstellen_label.config(text='')
-        self.extremstellen_label.config(text='')
-        self.wendestellen_label.config(text='')
+        self.nullstellen_label.config(text='|')
+        self.extremstellen_label.config(text='|')
+        self.wendestellen_label.config(text='|')
         list = self.frame_ableitungen.grid_slaves()
         for widget in list:
             widget.destroy()
@@ -365,9 +367,9 @@ class GraphWindow:
 
         try:
             nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
-                                                     self.scale * -1 + self.offset_x, self.scale + self.offset_x)
+                                                     self.scale / 2 * -1 + self.offset_x, self.scale / 2 + self.offset_x)
             if isinstance(nullstellen_list, types.NoneType):
-                self.nullstellen_label.config(text="keine Nullstellen innerhalb d. Kordinaten systems")
+                self.nullstellen_label.config(text="|keine Nullstellen innerhalb d. Kordinaten systems")
             else:
                 nullstellen = []
                 for i in range(len(nullstellen_list)):
@@ -381,11 +383,11 @@ class GraphWindow:
                                  f'N{fun.subscript_of(i + 1)}')
                 '''
         except ValueError as ve:
-            self.nullstellen_label.config(text=ve.args[0])
+            self.nullstellen_label.config(text=f"|{ve.args[0]}")
         try:
-            extrempunkte_list = func.calc_extrempunkte(self.scale / 2 * -1 + self.offset_x, self.scale + self.offset_x)
+            extrempunkte_list = func.calc_extrempunkte(self.scale / 2 * -1 + self.offset_x, self.scale / 2 + self.offset_x)
             if isinstance(extrempunkte_list, types.NoneType):
-                self.extremstellen_label.config(text="keine extrempunkte innerhalb d. Kordinaten systems")
+                self.extremstellen_label.config(text="|keine extrempunkte innerhalb d. Kordinaten systems")
             else:
                 deriv3_für_extrempunkte = []
                 for i in range(len(extrempunkte_list)):
@@ -418,12 +420,12 @@ class GraphWindow:
                         hp_i += 1
                 '''
         except ValueError as ve:
-            self.extremstellen_label.config(text=ve.args[0])
+            self.extremstellen_label.config(text=f"|{ve.args[0]}")
         try:
             wendepunkte_list = func.calc_wendepunkte(self.scale / 2 * -1 + self.offset_x,
                                                      self.scale / 2 + self.offset_x)
             if isinstance(wendepunkte_list, types.NoneType):
-                self.wendestellen_label.config(text="keine wendepunkte innerhalb d. Kordinaten systems")
+                self.wendestellen_label.config(text="|keine wendepunkte innerhalb d. Kordinaten systems")
             else:
                 wendepunkte = []
                 for i in range(len(wendepunkte_list)):
@@ -437,13 +439,12 @@ class GraphWindow:
                                  f'WP{fun.subscript_of(i)}')
                 '''
         except ValueError as ve:
-            self.wendestellen_label.config(text=ve.args[0])
+            self.wendestellen_label.config(text=f"|{ve.args[0]}")
 
     def functionlist_item_selected(self, event):
         self.list_functions_contextmenu.unpost()
-        index = self.list_functions.curselection()[0]
-        func = self.functionList[index]
-        self.selected_function = (index, func)
+        self.selected_index = self.list_functions.curselection()[0]
+        self.selected_function = self.functionList[self.selected_index]
         self.update_window()
 
 
@@ -472,14 +473,22 @@ class GraphWindow:
         fun_entry_win.root.mainloop()
         self.functionList.append(fun_entry_win.func)
 
+    def change_function_parameters_entry(self, event, funent):
+        if event.widget == funent.root:
+            print("change_function")
+            self.functionList[self.selected_index] = funent.func
+            self.selected_function = funent.func
+            print("self.functionlist[self.selected_index]", self.functionList[self.selected_index])
+            self.update_window()
+
     def change_function_parameters(self):
         if self.selected_function.termtype == fun.TermType.GANZ_RATIONAL:
             func_entry = funent.FunctionEntry(self.selected_function.termtype, self.selected_function.term.original,
                                               grad=len(self.selected_function.term.original) - 1)
         else:
-            func_Entry = funent.FunctionEntry(self.selected_function.termtype, self.selected_function.term.original)
-        func_Entry.root.mainloop()
-        self.functionList[self.selected_index] = func_Entry.func
+            func_entry = funent.FunctionEntry(self.selected_function.termtype, self.selected_function.term.original)
+        func_entry.root.bind("<Destroy>", lambda e: self.change_function_parameters_entry(e, func_entry), add='+')
+        func_entry.root.mainloop()
 
 
 

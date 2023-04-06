@@ -24,8 +24,8 @@ class FunctionEntry:
         frame = tk.Frame(self.root)
         frame.pack(side='top')
 
-        button = tk.Button(self.root, text='eingeben', command=self.enter_function)
-        button.pack(side='bottom')
+        self.button = tk.Button(self.root, text='eingeben', command=self.enter_function)
+        self.button.pack(side='bottom')
         if term_type == TermType.GANZ_RATIONAL:
             for i in range(grad+1):
                 if i==0:
@@ -95,7 +95,10 @@ class FunctionEntry:
             if abs(len(list_arg) - len(self.entry_arr)) != 0:
                 raise ValueError("list_arg und self.entry_arr haben verschiedene Längen")
             for i in range(len(list_arg)):
-                self.entry_arr[i].insert(0, f"{list_arg[i]}")
+                if list_arg[i] > 0:
+                    self.entry_arr[i].insert(0, f"+{list_arg[i]}")
+                else:
+                    self.entry_arr[i].insert(0, f"{list_arg[i]}")
 
 
 

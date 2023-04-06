@@ -172,6 +172,7 @@ class Function:
                     val = round(val, 3)
                     arr_to_return.append((val, 0))
                 i += 1
+            return arr_to_return
         if isinstance(self.term, ExponentielerTerm):
             raise ValueError("ExponentieleFunktionen haben keine Nullstellen")
         else:
@@ -200,7 +201,7 @@ class Function:
                         arr_to_return.append((val, 0))
                 if len(arr_to_return) == return_arr_length:
                     break
-            if return_arr_length == -1:
+            if return_arr_length == -1 and not isinstance(self.term, TrigonomischerTerm):
                 raise ValueError("Dickhead")
             elif return_arr_length < len(arr_to_return):
                 return None
