@@ -135,7 +135,7 @@ class Function:
     def arr_calc(self, x_arr, func_type: FunctionDerivative):
         return self.term.arr_calc(x_arr, func_type)
 
-    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max, streckung=None) -> []:
+    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max) -> []:
         if funcDer == FunctionDerivative.DERIVATIVE_3:
             raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
         return_arr_length = -1
@@ -171,6 +171,8 @@ class Function:
                     val = round(val, 3)
                     arr_to_return.append((val, 0))
                 i += 1
+        if isinstance(self.term, ExponentielerTerm):
+            raise ValueError("ExponentieleFunktionen haben keine Nullstellen")
         else:
             arr_to_return = []
             for x in range(int(min), int(max)):
@@ -191,7 +193,10 @@ class Function:
                     continue
                 val = round(val, 3)
                 if (val, 0) not in arr_to_return:
-                    arr_to_return.append((val, 0))
+                    if len(arr_to_return) == 0:
+                        arr_to_return.append((val, 0))
+                    elif abs(arr_to_return[-1][0] - val) > 0.002:
+                        arr_to_return.append((val, 0))
                 if len(arr_to_return) == return_arr_length:
                     break
             if return_arr_length == -1:
@@ -205,7 +210,10 @@ class Function:
     def calc_extrempunkte(self, min, max):
         if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 3:
             raise ValueError("term ist linear und hat keine Extrempunkte")
+        if isinstance(self.term, ExponentielerTerm):
+            raise ValueError("term ist Exponentiel und hat keine Nullstellen")
         if isinstance(self.term.deriv1, types.NoneType):
+            raise ValueError("keine Ableitung")
 
         ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
         print("ableitung1_nullstellen", ableitung1_nullstellen)
@@ -215,21 +223,23 @@ class Function:
         print("extremstellen", extremstellen_y)
         extremstellen = []
         for i in range(len(extremstellen_y)):
-            extremstellen.append((extremwerte[i], extremstellen_y[i]))
+            extremstellen.append((round(extremwerte[i], 3), round(extremstellen_y[i], 3)))
         print("extremstellen", extremstellen)
         return extremstellen
 
     def calc_wendepunkte(self, min, max):
-        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 4:
+        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 3:
             raise ValueError("term ist unterdem 3. Grad und hat somit keine Wendepunkte")
+        if isinstance(self.term, ExponentielerTerm):
+            raise ValueError("ExponentieleFunktionen haben keine Wendepunkte")
         if self.calc_deriv3(1) == 0:
-            return None
+            raise ValueError("")
         ableitung2_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_2, min, max)
         wendepunktwerte = [nullstelle[0] for nullstelle in ableitung2_nullstellen]
         wendepunkt_y = self.arr_calc(wendepunktwerte, FunctionDerivative.ORIGINAL)
         wendepunkte = []
         for i in range(len(wendepunkt_y)):
-            wendepunkte.append((wendepunktwerte[i], wendepunkt_y[i]))
+            wendepunkte.append((round(wendepunktwerte[i], 3), round(wendepunkt_y[i], 3)))
         return wendepunkte
 
     def deriv1_as_str(self):
@@ -470,7 +480,7 @@ class SchnittpunktTerm:
         return 0
 
     def calc_aufleitung(self, x):
-        return self.aufleitung[0] * (x + self.aufleitung[1])**2 + self.aufleitung[2] * x
+        return (self.aufleitung[0] / 3) * (x + self.aufleitung[1])**3 + self.aufleitung[2] * x
 
     def calc_for_range(self, deriv_type: FunctionDerivative, start, end, inc):
         to_return = []

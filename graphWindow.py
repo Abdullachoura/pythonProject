@@ -27,6 +27,10 @@ class GraphWindow:
         self.offset_x = 0
         self.offset_y = 0
         self.functionList = []
+        self.nullstellen_list = []
+        self.extremstellen_list = []
+        self.wendestellen_list = []
+        self.selected_function = None
         self.root = tk.Tk()
         self.scaleVar = tk.StringVar()
         self.scaleVar.set("20")
@@ -73,7 +77,7 @@ class GraphWindow:
         func_info_Frame.pack(side='top', fill='both', expand=1)
 
         funcFrame = tk.Frame(func_info_Frame)
-        funcFrame.pack(side="right", fill='both')
+        funcFrame.pack(side="right", fill='both', expand=True)
 
         button = tk.Button(funcFrame, text=chr(0x21E7), command=lambda: self.increment_yoffset(self.scale))
         button.pack(side='top', fill='x')
@@ -106,7 +110,7 @@ class GraphWindow:
         label.pack(side='top')
         self.list_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
         self.list_functions.pack(side="left", fill="both")
-        self.list_functions.bind('<<ListboxSelect>>', self.display_func_info, add='+')
+        self.list_functions.bind('<<ListboxSelect>>', self.functionlist_item_selected, add='+')
         self.list_functions.bind('<<Button-3>>', lambda x: 1+1, add='+')
 
         scrollbar = tk.Scrollbar(frame_list, orient='vertical')
@@ -126,8 +130,10 @@ class GraphWindow:
         frame_nullstellen_list.pack(side='left')
         label = tk.Label(frame_nullstellen_list, text='Nullstellen')
         label.pack(side='top')
+        self.nullstellen_label = tk.Label(frame_nullstellen_list, text='')
+        self.nullstellen_label.pack(side='bottom')
         self.list_nullstellen = tk.Listbox(frame_nullstellen_list, listvariable=self.nullstellenListVar)
-        self.list_nullstellen.pack(side='left', fill='both')
+        self.list_nullstellen.pack(side='left', fill='both', expand=True)
         scrollbar = tk.Scrollbar(frame_nullstellen_list, orient='vertical')
         scrollbar.config(command=self.list_nullstellen.yview)
         scrollbar.pack(side='right', fill='both')
@@ -137,8 +143,10 @@ class GraphWindow:
         frame_extremstellen_list.pack(side='left')
         label = tk.Label(frame_extremstellen_list, text='Extremstellen')
         label.pack(side='top')
+        self.extremstellen_label = tk.Label(frame_extremstellen_list, text='')
+        self.extremstellen_label.pack(side='bottom')
         list_extremstellen = tk.Listbox(frame_extremstellen_list, listvariable=self.extrempunkteListVar)
-        list_extremstellen.pack(side='left', fill='both')
+        list_extremstellen.pack(side='left', fill='both', expand=True)
         scrollbar = tk.Scrollbar(frame_extremstellen_list, orient='vertical')
         scrollbar.config(command=list_extremstellen.yview)
         scrollbar.pack(side='right', fill='both')
@@ -148,16 +156,14 @@ class GraphWindow:
         frame_wendestellen_list.pack(side='left')
         label = tk.Label(frame_wendestellen_list, text='Wendestellen')
         label.pack(side='top')
+        self.wendestellen_label = tk.Label(frame_wendestellen_list, text='')
+        self.wendestellen_label.pack(side='bottom')
         list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.wendepunkteListVar)
-        list_wendestellen.pack(side='left', fill='both')
+        list_wendestellen.pack(side='left', fill='both', expand=True)
         scrollbar = tk.Scrollbar(frame_wendestellen_list, orient='vertical')
         scrollbar.config(command=list_wendestellen.yview)
         scrollbar.pack(side='right', fill='both')
         list_wendestellen.config(yscrollcommand=scrollbar.set)
-
-
-
-
 
         frame_scale = tk.Frame(master=self.root)
         frame_scale.pack(side="bottom", fill='x')
@@ -204,7 +210,6 @@ class GraphWindow:
         btn_decrement_yoffset = tk.Button(frame_scale, text='-', command=lambda: self.decrement_yoffset(10))
         btn_decrement_yoffset.pack(side='left')
 
-
         self.root.mainloop()
 
 
@@ -239,14 +244,40 @@ class GraphWindow:
         yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
 
         x_vals = np.linspace(graphMinX, graphMaxX, num=100)
-        for function in self.functionList:
-            y_vals = function.arr_calc(x_vals, fun.FunctionDerivative.ORIGINAL)
-            self.ax.plot(x_vals, y_vals)
+        for i in range(len(self.functionList)):
+            y_vals = self.functionList[i].arr_calc(x_vals, fun.FunctionDerivative.ORIGINAL)
+            self.ax.plot(x_vals, y_vals, label=f'{chr(ord("f") + i)}')
+
+        for i in range(len(self.nullstellen_list)):
+            self.ax.plot(self.nullstellen_list[i][0], 0, 'bo')
+            self.ax.text(self.nullstellen_list[i][0] + 0.02, self.nullstellen_list[i][1] + 0.02,
+                         f'N{fun.subscript_of(i + 1)}')
+
+        tp_i = 1
+        hp_i = 1
+        for i in range(len(self.extremstellen_list)):
+            if self.extremstellen_list[i][0] > 0:
+                self.ax.plot(self.extremstellen_list[i][1][0], self.extremstellen_list[i][1][1], 'bo')
+                self.ax.text(self.extremstellen_list[i][1][0] + 0.02, self.extremstellen_list[i][1][1] + 0.02,
+                             f'TP{fun.subscript_of(tp_i)}')
+                tp_i += 1
+            elif self.extremstellen_list[i][0] < 0:
+                self.ax.plot(self.extremstellen_list[i][1][0], self.extremstellen_list[i][1][1], 'bo')
+                self.ax.text(self.extremstellen_list[i][1][0] + 0.02, self.extremstellen_list[i][1][1] + 0.02,
+                             f'HP{fun.subscript_of(hp_i)}')
+                hp_i += 1
+        for i in range(len(self.wendestellen_list)):
+            self.ax.plot(self.wendestellen_list[i][0], self.wendestellen_list[i][1], 'bo')
+            self.ax.text(self.wendestellen_list[i][0] + 0.02, self.wendestellen_list[i][1] + 0.02,
+                         f'WP{fun.subscript_of(i + 1)}')
+        self.ax.legend()
         self.canvas.draw()
 
 
     def update_window(self):
         self.update_list()
+        if not isinstance(self.selected_function, types.NoneType):
+            self.update_func_info_frames(self.selected_function[1], self.selected_function[0])
         self.update_canvas()
 #   end
 
@@ -299,12 +330,12 @@ class GraphWindow:
 
     def increment_xoffset(self, amount):
         self.offset_x += amount
-        self.offset_x_Var.set(str(self.offset_y))
+        self.offset_x_Var.set(str(self.offset_x))
         self.update_canvas()
 
     def decrement_xoffset(self, amount):
         self.offset_x -= amount
-        self.offset_x_Var.set(str(self.offset_y))
+        self.offset_x_Var.set(str(self.offset_x))
         self.update_canvas()
 
     def enter_xoffset(self):
@@ -312,14 +343,12 @@ class GraphWindow:
         self.offset_x = float(offset_x_str)
 #   end
 
-    def display_func_info(self, event):
-        self.update_canvas()
-        try:
-            index = self.list_functions.curselection()[0]
-        except IndexError:
+    def update_func_info_frames(self, func, index):
+        if isinstance(func, types.NoneType) or isinstance(index, types.NoneType):
             return
-
-        func = self.functionList[index]
+        self.nullstellen_label.config(text='')
+        self.extremstellen_label.config(text='')
+        self.wendestellen_label.config(text='')
         list = self.frame_ableitungen.grid_slaves()
         for widget in list:
             widget.destroy()
@@ -333,27 +362,29 @@ class GraphWindow:
         label = tk.Label(self.frame_ableitungen, text=f"{chr(ord('f') + index)}'''(x)={func.deriv3_as_str()}")
         label.grid(row=2)
 
-        nullstellen_str = ""
-        nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
-                                                 self.scale * -1 + self.offset_x, self.scale + self.offset_x)
-        if isinstance(nullstellen_list, types.NoneType):
-            label = tk.Label(self.frame_ableitungen, text="keine Nullstellen innerhalb d. Kordinaten systems")
-            label.grid(row=3)
-        else:
-            nullstellen = []
-            for i in range(len(nullstellen_list)):
-                nullstellen.append(f"N{fun.subscript_of(i + 1)}{nullstellen_list[i]}")
-            self.nullstellenListVar.set(nullstellen)
-
-            for i in range(len(nullstellen_list)):
-                self.ax.plot(nullstellen_list[i][0], 0, 'bo')
-                self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
-                             f'N{fun.subscript_of(i + 1)}')
-
+        try:
+            nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
+                                                     self.scale * -1 + self.offset_x, self.scale + self.offset_x)
+            if isinstance(nullstellen_list, types.NoneType):
+                self.nullstellen_label.config(text="keine Nullstellen innerhalb d. Kordinaten systems")
+            else:
+                nullstellen = []
+                for i in range(len(nullstellen_list)):
+                    nullstellen.append(f"N{fun.subscript_of(i + 1)}{nullstellen_list[i]}")
+                self.nullstellenListVar.set(nullstellen)
+                self.nullstellen_list = nullstellen_list
+                '''
+                for i in range(len(nullstellen_list)):
+                    self.ax.plot(nullstellen_list[i][0], 0, 'bo')
+                    self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
+                                 f'N{fun.subscript_of(i + 1)}')
+                '''
+        except ValueError as ve:
+            self.nullstellen_label.config(text=ve.args[0])
+        try:
             extrempunkte_list = func.calc_extrempunkte(self.scale / 2 * -1 + self.offset_x, self.scale + self.offset_x)
             if isinstance(extrempunkte_list, types.NoneType):
-                label = tk.Label(self.frame_ableitungen, text="keine extrempunkte innerhalb d. Kordinaten systems")
-                label.grid(row=3)
+                self.extremstellen_label.config(text="keine extrempunkte innerhalb d. Kordinaten systems")
             else:
                 deriv3_für_extrempunkte = []
                 for i in range(len(extrempunkte_list)):
@@ -370,8 +401,9 @@ class GraphWindow:
                         extrempunkte.append(f"HP{fun.subscript_of(hp_i)}{extrempunkte_list[i]}")
                         hp_i += 1
                 self.extrempunkteListVar.set(extrempunkte)
-                tp_i = 1
-                hp_i = 1
+                self.extremstellen_list = [(np.sign(func.calc_deriv2(extrempunkte_list[i][0])),
+                                            extrempunkte_list[i]) for i in range(len(extrempunkte_list))]
+                '''
                 for i in range(len(extrempunkte_list)):
                     if deriv3_für_extrempunkte[i] > 0:
                         self.ax.plot(extrempunkte_list[i][0], extrempunkte_list[i][1], 'bo')
@@ -383,21 +415,35 @@ class GraphWindow:
                         self.ax.text(extrempunkte_list[i][0] + 0.02, extrempunkte_list[i][1] + 0.02,
                                      f'HP{fun.subscript_of(hp_i)}')
                         hp_i += 1
-
-            wendepunkte_list = func.calc_wendepunkte(self.scale / 2 * -1 + self.offset_x, self.scale / 2 + self.offset_x)
+                '''
+        except ValueError as ve:
+            self.extremstellen_label.config(text=ve.args[0])
+        try:
+            wendepunkte_list = func.calc_wendepunkte(self.scale / 2 * -1 + self.offset_x,
+                                                     self.scale / 2 + self.offset_x)
             if isinstance(wendepunkte_list, types.NoneType):
-                label = tk.Label(self.frame_ableitungen, text="keine wendepunkte innerhalb d. Kordinaten systems")
-                label.grid(row=3)
+                self.wendestellen_label.config(text="keine wendepunkte innerhalb d. Kordinaten systems")
             else:
                 wendepunkte = []
                 for i in range(len(wendepunkte_list)):
-                    wendepunkte.append(f"WP{fun.subscript_of(i)}{wendepunkte_list[i]}")
+                    wendepunkte.append(f"WP{fun.subscript_of(i + 1)}{wendepunkte_list[i]}")
                 self.wendepunkteListVar.set(wendepunkte)
+                self.wendestellen_list = wendepunkte_list
+                '''
                 for i in range(len(wendepunkte_list)):
-                    self.ax.plot(extrempunkte_list[i][0], extrempunkte_list[i][1], 'bo')
-                    self.ax.text(extrempunkte_list[i][0] + 0.02, extrempunkte_list[i][1] + 0.02,
-                                    f'WP{fun.subscript_of(i)}')
-            self.canvas.draw()
+                    self.ax.plot(wendepunkte_list[i][0], wendepunkte_list[i][1], 'bo')
+                    self.ax.text(wendepunkte_list[i][0] + 0.02, wendepunkte_list[i][1] + 0.02,
+                                 f'WP{fun.subscript_of(i)}')
+                '''
+        except ValueError as ve:
+            self.wendestellen_label.config(text=ve.args[0])
+
+    def functionlist_item_selected(self, event):
+        index = self.list_functions.curselection()[0]
+        func = self.functionList[index]
+        self.selected_function = (index, func)
+        self.update_window()
+
 
     def popup(self, event):
         self.list_functions.selection_clear(0, tk.END)
