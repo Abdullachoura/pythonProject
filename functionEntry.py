@@ -5,10 +5,10 @@ import tkinter.messagebox as msgbox
 from tkinter import ttk
 from tkinter.font import Font
 
-from Function import Function
-from Function import TermType
-from Function import superscript_of
-from Function import TrigonometrischerOperator as TriOp
+from function import Function
+from function import TermType
+from function import superscript_of
+from function import TrigonometrischerOperator as TriOp
 
 
 class FunctionEntry:

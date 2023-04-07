@@ -29,7 +29,9 @@ def newton_verfahren(f, fd, val, acc):
     delta = dx(f, val)
     steps = 0
     while delta > acc and steps < 200:
-        val = val - f(val) / fd(val)
+        f_val = f(val)
+        fd_val = fd(val)
+        val = val - f_val / fd_val
         delta = dx(f, val)
         steps += 1
     if steps >= 200:
@@ -130,6 +132,9 @@ class Function:
     def calc_deriv3(self, x):
         return self.term.calc_deriv3(x)
 
+    def calc_aufleitung(self, x):
+        return self.term.calc_aufleitung(x)
+
     def calc_for_range(self, fun_type: FunctionDerivative, min, max, inc):
         return self.term.calc_for_range(fun_type, min, max, inc)
 
@@ -146,7 +151,9 @@ class Function:
             return_arr_length = 2
             if np.sign(self.term.original[0]) == np.sign(self.term.original[2]) \
                     and funcDer == FunctionDerivative.ORIGINAL:
-                return []
+                return None
+        if isinstance(self.term, ExponentielerTerm):
+            raise ValueError("ExponentieleFunktionen haben keine Nullstellen")
         if isinstance(self.term, TrigonomischerTerm):
             to_use_arr = []
             arr_to_return = []
@@ -173,8 +180,8 @@ class Function:
                     arr_to_return.append((val, 0))
                 i += 1
             return arr_to_return
-        if isinstance(self.term, ExponentielerTerm):
-            raise ValueError("ExponentieleFunktionen haben keine Nullstellen")
+        if isinstance(self.term, GanzrationaleTerm):
+            return [(-1 * self.term.original[0] / self.term.original[1], 0)]
         else:
             arr_to_return = []
             for x in range(int(min), int(max)):
@@ -186,7 +193,6 @@ class Function:
                         val = newton_verfahren(self.calc_original, self.calc_deriv1, val, 0.001)
                     elif funcDer == FunctionDerivative.DERIVATIVE_1:
                         val = newton_verfahren(self.calc_deriv1, self.calc_deriv2, val, 0.001)
-                        print("val", val)
                     elif funcDer == FunctionDerivative.DERIVATIVE_2:
                         val = newton_verfahren(self.calc_deriv2, self.calc_deriv3, val, 0.001)
                 except ZeroDivisionError:
@@ -218,15 +224,11 @@ class Function:
             raise ValueError("keine Ableitung")
 
         ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
-        print("ableitung1_nullstellen", ableitung1_nullstellen)
         extremwerte = [nullstelle[0] for nullstelle in ableitung1_nullstellen]
-        print("extremwerte", extremwerte)
         extremstellen_y = self.arr_calc(extremwerte, FunctionDerivative.ORIGINAL)
-        print("extremstellen", extremstellen_y)
         extremstellen = []
         for i in range(len(extremstellen_y)):
             extremstellen.append((round(extremwerte[i], 3), round(extremstellen_y[i], 3)))
-        print("extremstellen", extremstellen)
         return extremstellen
 
     def calc_wendepunkte(self, min, max):
@@ -243,6 +245,24 @@ class Function:
         for i in range(len(wendepunkt_y)):
             wendepunkte.append((round(wendepunktwerte[i], 3), round(wendepunkt_y[i], 3)))
         return wendepunkte
+
+    def calc_integral(self, lim1, lim2):
+        nullstellen = self.calc_nullstellen(FunctionDerivative.ORIGINAL, lim1, lim2)
+        if isinstance(nullstellen, list):
+            integral = 0
+            nullwerte = [nullstelle[0] for nullstelle in nullstellen]
+            if lim1 in nullwerte or lim2 in nullwerte or len(nullwerte) == 0:
+                return abs(self.calc_aufleitung(lim1) - self.calc_aufleitung(lim2))
+            nullwerte.sort()
+            min = lim1
+            for i in range(len(nullstellen)):
+                integral += self.calc_integral(min, nullwerte[i])
+                min = nullwerte[i]
+            integral += self.calc_integral(min, lim2)
+            return integral
+        return abs(self.calc_aufleitung(lim1) - self.calc_aufleitung(lim2))
+
+
 
     def deriv1_as_str(self):
         return self.term.deriv1_as_str()
@@ -262,7 +282,6 @@ class Function:
 
 class GanzrationaleTerm:
     def __init__(self, *args):
-        print("ganzrationale", args)
         self.original = []
         self.aufleitung = []
         self.deriv1 = []
@@ -274,9 +293,6 @@ class GanzrationaleTerm:
         self.aufleitung.append(0)
         for i in range(len(self.original)):
             self.aufleitung.append(self.original[i] / (i+1))
-
-        print("original", self.original)
-        print("aufleitung", self.aufleitung)
 
         for i in range(len(self.original)):
             if i == len(self.original)-1: continue

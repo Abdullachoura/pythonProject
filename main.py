@@ -1,8 +1,9 @@
+import sys
 import tkinter as tk
 import loginWindow
 import database
 import graphWindow
-import Function as fun
+import function as fun
 
 '''
 greeting = tk.Label(text="hello, mein friseur ist nice")
@@ -31,8 +32,8 @@ button.pack()
 
 
 database.databaseStartup()
-loginWin = loginWindow.LoginWindow()
-if (loginWin.logged_in == False): #remove == False
+#loginWin = loginWindow.LoginWindow()
+if (True): #remove == False
     graphWindow.GraphWindow()
 
 

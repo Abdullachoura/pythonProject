@@ -1,11 +1,14 @@
+import sys
 import time
+import tkinter.messagebox as msgbox
 import tkinter as tk
 import types
 
 import matplotlib.axes
 
-import Function as fun
+import function as fun
 import functionEntry as funent
+import scalebarFunktionChange as sfc
 
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg, NavigationToolbar2Tk
@@ -26,7 +29,7 @@ class GraphWindow:
         self.scale = 20
         self.offset_x = 0
         self.offset_y = 0
-        self.functionList = []
+        self.functionList = [fun.Function(fun.TermType.GANZ_RATIONAL, 2, -2)]
         self.nullstellen_list = []
         self.extremstellen_list = []
         self.wendestellen_list = []
@@ -45,7 +48,7 @@ class GraphWindow:
         self.wendepunkteListVar = tk.Variable(value=())
 
         self.root.title('Functional')
-
+        self.root.bind('<Destroy>', self.on_close)
         menubar = tk.Menu(self.root)
         self.root.config(menu=menubar)
         funktion_menu = tk.Menu(menubar)
@@ -80,44 +83,49 @@ class GraphWindow:
         funcFrame = tk.Frame(func_info_Frame)
         funcFrame.pack(side="right", fill='both', expand=True)
 
-        button = tk.Button(funcFrame, text=chr(0x21E7), command=lambda: self.increment_yoffset(self.scale))
+        button = tk.Button(funcFrame, text=chr(0x21E7), command=lambda: self.increment_yoffset(1))
         button.pack(side='top', fill='x')
 
-        button = tk.Button(funcFrame, text=chr(0x21E9), command=lambda: self.decrement_yoffset(self.scale))
+        button = tk.Button(funcFrame, text=chr(0x21E9), command=lambda: self.decrement_yoffset(1))
         button.pack(side='bottom', fill='x')
 
-        button = tk.Button(funcFrame, text=chr(0x21E6), command=lambda: self.decrement_xoffset(self.scale))
+        button = tk.Button(funcFrame, text=chr(0x21E6), command=lambda: self.decrement_xoffset(1))
         button.pack(side='left', fill='y')
 
         self.canvas = FigureCanvasTkAgg(self.fig, master=funcFrame)
         self.canvas.draw()
         self.canvas.get_tk_widget().pack(fill='both', expand=1, side="left")
 
-        button = tk.Button(funcFrame, text=chr(0x21E8), command=lambda: self.increment_xoffset(self.scale))
+        button = tk.Button(funcFrame, text=chr(0x21E8), command=lambda: self.increment_xoffset(1))
         button.pack(side='right', fill='y')
 
         self.frame_list_info = tk.Frame(func_info_Frame, width=50)
         self.frame_list_info.pack(side="left", fill='y')
 
         frame_list = tk.Frame(self.frame_list_info)
-        frame_list.pack(side='top')
+        frame_list.pack(side='top', fill='x', expand=True)
 
-        self.list_functions_contextmenu = tk.Menu(self.root, tearoff=0)
-        self.list_functions_contextmenu.add_command(label="Entfehrnen")
-        self.list_functions_contextmenu.add_command(label="Bearbeiten", command=self.change_function_parameters)
-        self.list_functions_contextmenu.add_command(label="Integral berechen")
+
+        self.listbox_function_contextmenu = tk.Menu(self.root, tearoff=0)
+        self.change_function_param_menu = tk.Menu(self.listbox_function_contextmenu)
+        self.change_function_param_menu.add_command(label="Funktions eingabefenster",
+                                                    command=self.change_function_parameters_ent)
+        self.change_function_param_menu.add_command(label="SKalliertbalken", command=self.change_function_scalebar)
+        self.listbox_function_contextmenu.add_command(label="Entfehrnen", command=self.remove_function)
+        self.listbox_function_contextmenu.add_cascade(label="Bearbeiten", menu=self.change_function_param_menu)
+        self.listbox_function_contextmenu.add_command(label="Integral berechen", command=self.open_integral_calc)
 
         label = tk.Label(frame_list, text='Funktionen')
         label.pack(side='top')
-        self.list_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
-        self.list_functions.pack(side="left", fill="both")
-        self.list_functions.bind('<<ListboxSelect>>', self.functionlist_item_selected, add='+')
-        self.list_functions.bind('<Button-3>', self.popup, add='+')
+        self.listbox_functions = tk.Listbox(frame_list, listvariable=self.funcListVar, width=50)
+        self.listbox_functions.pack(side="left", fill="both", expand=True)
+        self.listbox_functions.bind('<<ListboxSelect>>', self.functionlist_item_selected, add='+')
+        self.listbox_functions.bind('<Button-3>', self.popup, add='+')
 
         scrollbar = tk.Scrollbar(frame_list, orient='vertical')
-        scrollbar.config(command=self.list_functions.yview)
+        scrollbar.config(command=self.listbox_functions.yview)
         scrollbar.pack(side='right', fill='both')
-        self.list_functions.config(yscrollcommand=scrollbar.set, width=50)
+        self.listbox_functions.config(yscrollcommand=scrollbar.set, width=50)
 
         label = tk.Label(self.frame_list_info, text="ableitungen")
         label.pack(side='top')
@@ -131,7 +139,7 @@ class GraphWindow:
         frame_nullstellen_list.pack(side='left')
         label = tk.Label(frame_nullstellen_list, text='Nullstellen')
         label.pack(side='top')
-        self.nullstellen_label = tk.Label(frame_nullstellen_list, text='')
+        self.nullstellen_label = tk.Label(frame_nullstellen_list, text='', borderwidth=1)
         self.nullstellen_label.pack(side='bottom')
         self.list_nullstellen = tk.Listbox(frame_nullstellen_list, listvariable=self.nullstellenListVar)
         self.list_nullstellen.pack(side='left', fill='both', expand=True)
@@ -144,7 +152,7 @@ class GraphWindow:
         frame_extremstellen_list.pack(side='left')
         label = tk.Label(frame_extremstellen_list, text='Extremstellen')
         label.pack(side='top')
-        self.extremstellen_label = tk.Label(frame_extremstellen_list, text='')
+        self.extremstellen_label = tk.Label(frame_extremstellen_list, text='', borderwidth=1)
         self.extremstellen_label.pack(side='bottom')
         list_extremstellen = tk.Listbox(frame_extremstellen_list, listvariable=self.extrempunkteListVar)
         list_extremstellen.pack(side='left', fill='both', expand=True)
@@ -157,7 +165,7 @@ class GraphWindow:
         frame_wendestellen_list.pack(side='left')
         label = tk.Label(frame_wendestellen_list, text='Wendestellen')
         label.pack(side='top')
-        self.wendestellen_label = tk.Label(frame_wendestellen_list, text='')
+        self.wendestellen_label = tk.Label(frame_wendestellen_list, text='', borderwidth=1)
         self.wendestellen_label.pack(side='bottom')
         list_wendestellen = tk.Listbox(frame_wendestellen_list, listvariable=self.wendepunkteListVar)
         list_wendestellen.pack(side='left', fill='both', expand=True)
@@ -211,9 +219,12 @@ class GraphWindow:
         btn_decrement_yoffset = tk.Button(frame_scale, text='-', command=lambda: self.decrement_yoffset(10))
         btn_decrement_yoffset.pack(side='left')
 
+        self.update_window()
         self.root.mainloop()
 
-
+    def on_close(self, event):
+        if event.widget == self.root:
+            sys.exit()
 
 #   update
     def update_list(self):
@@ -279,8 +290,7 @@ class GraphWindow:
 
     def update_window(self):
         self.update_list()
-        if not isinstance(self.selected_function, types.NoneType):
-            self.update_func_info_frames(self.selected_function, self.selected_index)
+        self.update_func_info_frames(self.selected_function, self.selected_index)
         self.update_canvas()
 #   end
 
@@ -347,14 +357,19 @@ class GraphWindow:
 #   end
 
     def update_func_info_frames(self, func, index):
-        if isinstance(func, types.NoneType) or isinstance(index, types.NoneType):
-            return
-        self.nullstellen_label.config(text='|')
-        self.extremstellen_label.config(text='|')
-        self.wendestellen_label.config(text='|')
+
+        self.nullstellen_label.config(text='')
+        self.extremstellen_label.config(text='')
+        self.wendestellen_label.config(text='')
         list = self.frame_ableitungen.grid_slaves()
         for widget in list:
             widget.destroy()
+
+        if isinstance(func, types.NoneType) or isinstance(index, types.NoneType):
+            self.nullstellenListVar.set(())
+            self.extrempunkteListVar.set(())
+            self.wendepunkteListVar.set(())
+            return
 
         label = tk.Label(self.frame_ableitungen, text=f"{chr(ord('f') + index)}'(x)={func.deriv1_as_str()}")
         label.grid(row=0)
@@ -425,7 +440,7 @@ class GraphWindow:
             wendepunkte_list = func.calc_wendepunkte(self.scale / 2 * -1 + self.offset_x,
                                                      self.scale / 2 + self.offset_x)
             if isinstance(wendepunkte_list, types.NoneType):
-                self.wendestellen_label.config(text="|keine wendepunkte innerhalb d. Kordinaten systems")
+                self.wendestellen_label.config(text="|keine wendepunkte im Koordinatensystem")
             else:
                 wendepunkte = []
                 for i in range(len(wendepunkte_list)):
@@ -442,21 +457,21 @@ class GraphWindow:
             self.wendestellen_label.config(text=f"|{ve.args[0]}")
 
     def functionlist_item_selected(self, event):
-        self.list_functions_contextmenu.unpost()
-        self.selected_index = self.list_functions.curselection()[0]
+        self.listbox_function_contextmenu.unpost()
+        self.selected_index = self.listbox_functions.curselection()[0]
         self.selected_function = self.functionList[self.selected_index]
         self.update_window()
 
 
     def popup(self, event):
-        self.list_functions.selection_clear(0, tk.END)
-        self.list_functions.selection_set(self.list_functions.nearest(event.y))
-        self.list_functions.activate(self.list_functions.nearest(event.y))
-        self.selected_index = self.list_functions.curselection()[0]
+        self.listbox_functions.selection_clear(0, tk.END)
+        self.listbox_functions.selection_set(self.listbox_functions.nearest(event.y))
+        self.listbox_functions.activate(self.listbox_functions.nearest(event.y))
+        self.selected_index = self.listbox_functions.curselection()[0]
         self.selected_function = self.functionList[self.selected_index]
-        self.list_functions_contextmenu.post(self.root.winfo_pointerx(), self.root.winfo_pointery())
-        self.list_functions.bind("<FocusOut>", lambda x: self.list_functions_contextmenu.unpost(), add='+')
-        self.list_functions_contextmenu.grab_release()
+        self.listbox_function_contextmenu.post(self.root.winfo_pointerx(), self.root.winfo_pointery())
+        self.listbox_functions.bind("<FocusOut>", lambda x: self.listbox_function_contextmenu.unpost(), add='+')
+        self.listbox_function_contextmenu.grab_release()
 
 
 
@@ -481,7 +496,7 @@ class GraphWindow:
             print("self.functionlist[self.selected_index]", self.functionList[self.selected_index])
             self.update_window()
 
-    def change_function_parameters(self):
+    def change_function_parameters_ent(self):
         if self.selected_function.termtype == fun.TermType.GANZ_RATIONAL:
             func_entry = funent.FunctionEntry(self.selected_function.termtype, self.selected_function.term.original,
                                               grad=len(self.selected_function.term.original) - 1)
@@ -490,14 +505,52 @@ class GraphWindow:
         func_entry.root.bind("<Destroy>", lambda e: self.change_function_parameters_entry(e, func_entry), add='+')
         func_entry.root.mainloop()
 
-
-
+    def change_function_scalebar(self):
+        scalbarFunctionChange = sfc.ScalebarFunctionChangeWindow(self.update_window,
+                                                                 self.selected_function,
+                                                                 self.selected_index)
 
     def remove_function(self):
-        pass
+        self.functionList.remove(self.selected_function)
+        self.selected_function = None
+        self.selected_index = None
+        self.update_window()
+
+    def show_integral_result(self, lim1_str, lim2_str):
+        try:
+            lim1 = float(lim1_str)
+            lim2 = float(lim2_str)
+        except Exception as ex:
+            raise
+        integral = self.selected_function.calc_integral(lim1, lim2)
+        msgbox.showinfo('Integral',
+                        f"Integral von {self.selected_function} "
+                        f"| lim{fun.subscript_of(1)}={lim1_str} "
+                        f"| lim{fun.subscript_of(2)}={lim2_str} "
+                        f" ist {fun.round(integral, 3)}LE{fun.superscript_of(2)}")
+
 
     def open_integral_calc(self):
-        pass
+        root = tk.Tk()
+
+        button = tk.Button(root, text='Eingeben')
+        button.pack(side='bottom')
+
+        label = tk.Label(root, text='unteres Limmit:')
+        label.pack(side='left')
+
+        lim1_entry_var = tk.StringVar()
+        entry_lim1 = tk.Entry(root, textvariable=lim1_entry_var)
+        entry_lim1.pack(side='left')
+
+        label = tk.Label(root, text='oberes Limmit:')
+        label.pack(side='left')
+
+        lim2_entry_var = tk.StringVar()
+        entry_lim2 = tk.Entry(root, textvariable=lim2_entry_var)
+        entry_lim2.pack(side='left')
+
+        button.config(command=lambda: self.show_integral_result(entry_lim1.get(), entry_lim2.get()))
 
 
     def rational_function_button_event(self, root:tk.Tk,  termType:fun.TermType, grad):
