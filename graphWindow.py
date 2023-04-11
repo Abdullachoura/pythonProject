@@ -1,19 +1,13 @@
 import sys
-import time
 import tkinter.messagebox as msgbox
 import tkinter as tk
 import types
-
-import matplotlib.axes
 
 import function as fun
 import functionEntry as funent
 import scalebarFunktionChange as sfc
 
-from matplotlib.backends.backend_tkagg import (
-    FigureCanvasTkAgg, NavigationToolbar2Tk
-)
-from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -29,7 +23,10 @@ class GraphWindow:
         self.scale = 20
         self.offset_x = 0
         self.offset_y = 0
-        self.functionList = [fun.Function(fun.TermType.GANZ_RATIONAL, 2, -2)]
+        self.functionList = [fun.Function(fun.TermType.GANZ_RATIONAL, 2, -2),
+                             fun.Function(fun.TermType.SCHNITTPUNKT, 1, -1, -5),
+                             fun.Function(fun.TermType.TRIGONOMETRISCH, fun.TrigonometrischerOperator.SIN, 5, 0, 10),
+                             fun.Function(fun.TermType.EXPONENTIEL, 2)]
         self.nullstellen_list = []
         self.extremstellen_list = []
         self.wendestellen_list = []
@@ -65,8 +62,8 @@ class GraphWindow:
         )
         self.fig, self.ax = plt.subplots(1, 1)
         self.ax.grid(True, color='grey')
-        self.ax.spines['left'].set_position('center')
-        self.ax.spines['bottom'].set_position('center')
+        self.ax.spines['left'].set_position(('data', 0))
+        self.ax.spines['bottom'].set_position(('data', 0))
         self.ax.spines['right'].set_color('none')
         self.ax.spines['top'].set_color('none')
         self.ax.patch.set_edgecolor('grey')
@@ -103,8 +100,7 @@ class GraphWindow:
         self.frame_list_info.pack(side="left", fill='y')
 
         frame_list = tk.Frame(self.frame_list_info)
-        frame_list.pack(side='top', fill='x', expand=True)
-
+        frame_list.pack(side='top', fill='both', expand=True)
 
         self.listbox_function_contextmenu = tk.Menu(self.root, tearoff=0)
         self.change_function_param_menu = tk.Menu(self.listbox_function_contextmenu)
@@ -242,18 +238,14 @@ class GraphWindow:
         graphMaxY = self.scale / 2 + self.offset_y
         self.ax.clear()
         self.ax.grid(True, color='grey')
-        self.ax.spines['left'].set_position('center')
-        self.ax.spines['bottom'].set_position('center')
+        self.ax.spines['left'].set_position(('data', 0))
+        self.ax.spines['bottom'].set_position(('data', 0))
         self.ax.spines['right'].set_color('none')
         self.ax.spines['top'].set_color('none')
         self.ax.patch.set_edgecolor('grey')
         self.ax.patch.set_linewidth(1)
         self.ax.set_xlim(graphMinX, graphMaxX)
         self.ax.set_ylim(graphMinY, graphMaxY)
-        xticklabels = self.ax.xaxis.get_major_ticks()
-        xticklabels[round((len(xticklabels)-1) / 2)].label.set_visible(False)
-        yticklabels = self.ax.yaxis.get_major_ticks()
-        yticklabels[round((len(yticklabels)-1) / 2)].label.set_visible(False)
 
         x_vals = np.linspace(graphMinX, graphMaxX, num=100)
         for i in range(len(self.functionList)):
@@ -384,38 +376,38 @@ class GraphWindow:
             nullstellen_list = func.calc_nullstellen(fun.FunctionDerivative.ORIGINAL,
                                                      self.scale / 2 * -1 + self.offset_x, self.scale / 2 + self.offset_x)
             if isinstance(nullstellen_list, types.NoneType):
-                self.nullstellen_label.config(text="|keine Nullstellen innerhalb d. Kordinaten systems")
+                self.nullstellen_list.clear()
+                self.nullstellenListVar.set(())
+                self.nullstellen_label.config(text="|keine Nullstellen")
             else:
                 nullstellen = []
                 for i in range(len(nullstellen_list)):
                     nullstellen.append(f"N{fun.subscript_of(i + 1)}{nullstellen_list[i]}")
                 self.nullstellenListVar.set(nullstellen)
                 self.nullstellen_list = nullstellen_list
-                '''
-                for i in range(len(nullstellen_list)):
-                    self.ax.plot(nullstellen_list[i][0], 0, 'bo')
-                    self.ax.text(nullstellen_list[i][0] + 0.02, nullstellen_list[i][1] + 0.02,
-                                 f'N{fun.subscript_of(i + 1)}')
-                '''
         except ValueError as ve:
+            self.nullstellen_list.clear()
+            self.nullstellenListVar.set(())
             self.nullstellen_label.config(text=f"|{ve.args[0]}")
         try:
             extrempunkte_list = func.calc_extrempunkte(self.scale / 2 * -1 + self.offset_x, self.scale / 2 + self.offset_x)
             if isinstance(extrempunkte_list, types.NoneType):
-                self.extremstellen_label.config(text="|keine extrempunkte innerhalb d. Kordinaten systems")
+                self.extremstellen_list.clear()
+                self.extrempunkteListVar.set(())
+                self.extremstellen_label.config(text="keine extrempunkte")
             else:
-                deriv3_für_extrempunkte = []
+                deriv2_extrempunkte_y= []
                 for i in range(len(extrempunkte_list)):
-                    deriv3_für_extrempunkte.append(func.calc_deriv2(extrempunkte_list[i][0]))
-                print("deriv3_für_extrempunkte", deriv3_für_extrempunkte)
+                    deriv2_extrempunkte_y.append(func.calc_deriv2(extrempunkte_list[i][0]))
+                print("deriv3_für_extrempunkte", deriv2_extrempunkte_y)
                 extrempunkte = []
                 tp_i = 1
                 hp_i = 1
                 for i in range(len(extrempunkte_list)):
-                    if deriv3_für_extrempunkte[i] > 0:
+                    if deriv2_extrempunkte_y[i] > 0:
                         extrempunkte.append(f"TP{fun.subscript_of(tp_i)}{extrempunkte_list[i]}")
                         tp_i += 1
-                    elif deriv3_für_extrempunkte[i] < 0:
+                    elif deriv2_extrempunkte_y[i] < 0:
                         extrempunkte.append(f"HP{fun.subscript_of(hp_i)}{extrempunkte_list[i]}")
                         hp_i += 1
                 self.extrempunkteListVar.set(extrempunkte)
@@ -435,11 +427,15 @@ class GraphWindow:
                         hp_i += 1
                 '''
         except ValueError as ve:
+            self.extremstellen_list.clear()
+            self.extrempunkteListVar.set(())
             self.extremstellen_label.config(text=f"|{ve.args[0]}")
         try:
             wendepunkte_list = func.calc_wendepunkte(self.scale / 2 * -1 + self.offset_x,
                                                      self.scale / 2 + self.offset_x)
             if isinstance(wendepunkte_list, types.NoneType):
+                self.wendestellen_list.clear()
+                self.wendepunkteListVar.set(())
                 self.wendestellen_label.config(text="|keine wendepunkte im Koordinatensystem")
             else:
                 wendepunkte = []
@@ -454,6 +450,8 @@ class GraphWindow:
                                  f'WP{fun.subscript_of(i)}')
                 '''
         except ValueError as ve:
+            self.wendestellen_list.clear()
+            self.wendepunkteListVar.set(())
             self.wendestellen_label.config(text=f"|{ve.args[0]}")
 
     def functionlist_item_selected(self, event):
@@ -506,9 +504,9 @@ class GraphWindow:
         func_entry.root.mainloop()
 
     def change_function_scalebar(self):
-        scalbarFunctionChange = sfc.ScalebarFunctionChangeWindow(self.update_window,
-                                                                 self.selected_function,
-                                                                 self.selected_index)
+        sfc.ScalebarFunctionChangeWindow(self.update_window,
+                                        self.selected_function,
+                                        self.selected_index)
 
     def remove_function(self):
         self.functionList.remove(self.selected_function)
@@ -531,7 +529,7 @@ class GraphWindow:
 
 
     def open_integral_calc(self):
-        root = tk.Tk()
+        root = tk.Toplevel()
 
         button = tk.Button(root, text='Eingeben')
         button.pack(side='bottom')
@@ -553,12 +551,12 @@ class GraphWindow:
         button.config(command=lambda: self.show_integral_result(entry_lim1.get(), entry_lim2.get()))
 
 
-    def rational_function_button_event(self, root:tk.Tk,  termType:fun.TermType, grad):
+    def rational_function_button_event(self, root:tk.Toplevel,  termType:fun.TermType, grad):
         root.destroy()
         self.open_function_entry(termType, grad)
 
     def rational_function(self):
-        root = tk.Tk()
+        root = tk.Toplevel()
         root.title('Funktionsgrad angabe')
         text_var = tk.StringVar()
         label = tk.Label(root, text='gewünschter Funktionsgrad:')

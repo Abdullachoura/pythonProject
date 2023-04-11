@@ -180,7 +180,9 @@ class Function:
                     arr_to_return.append((val, 0))
                 i += 1
             return arr_to_return
-        if isinstance(self.term, GanzrationaleTerm):
+        if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) == 2:
+            if self.term.original[1] == 0:
+                return None
             return [(-1 * self.term.original[0] / self.term.original[1], 0)]
         else:
             arr_to_return = []

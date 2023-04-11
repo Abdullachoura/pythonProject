@@ -17,7 +17,7 @@ class FunctionEntry:
     func : Function
 
     def __init__(self, term_type, list_arg=[], grad=0):
-        self.root = tk.Tk()
+        self.root = tk.Toplevel()
         self.entry_arr = []
         self.termType = term_type
 
