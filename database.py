@@ -1,8 +1,7 @@
 import sqlite3
 
 
-
-def databaseStartup():
+def database_startup():
     connection = sqlite3.connect('database.db')
     cur = connection.cursor()
     cur = cur.execute("SELECT tbl_name FROM sqlite_master WHERE type='table' AND tbl_name='users'")
@@ -12,7 +11,6 @@ def databaseStartup():
             'create table users (id integer primary key autoincrement, name str not null, password str not null);')
     connection.commit()
     connection.close()
-
 
 
 def login(name, password) -> (bool, str):
@@ -25,6 +23,7 @@ def login(name, password) -> (bool, str):
         return False, "Passwort ist falsch"
     return True, "Wilkommen {0}".format(name)
 
+
 def register(name, password) -> (bool, str):
     connection = sqlite3.connect('database.db')
     cursor = connection.execute('select * from users where name = ?', (name,))
@@ -34,10 +33,10 @@ def register(name, password) -> (bool, str):
         return False, 'username taken'
     cursor = connection.execute('select * from users where password = ?', (password,))
     passwords = cursor.fetchall()
-    if len(passwords)!=0:
+    if len(passwords) != 0:
         print('password taken')
         return False, 'password taken'
-    cursor = connection.execute("INSERT INTO users (name, password) VALUES (?, ?)", (name, password))
+    connection.execute("INSERT INTO users (name, password) VALUES (?, ?)", (name, password))
     connection.commit()
     connection.close()
     return True, 'login erfolgreich'

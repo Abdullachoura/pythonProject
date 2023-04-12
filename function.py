@@ -1,16 +1,15 @@
-import time
 import types
 from enum import Enum
-
-import kiwisolver
 import numpy as np
 
+
 class FunctionDerivative(Enum):
-    ORIGINAL=1
-    DERIVATIVE_1=2
-    DERIVATIVE_2=3
-    DERIVATIVE_3=4
-    AUFLEITUNG=5
+    ORIGINAL = 1
+    DERIVATIVE_1 = 2
+    DERIVATIVE_2 = 3
+    DERIVATIVE_3 = 4
+    AUFLEITUNG = 5
+
 
 class TermType(Enum):
     GANZ_RATIONAL = 1
@@ -18,12 +17,15 @@ class TermType(Enum):
     TRIGONOMETRISCH = 3
     EXPONENTIEL = 4
 
+
 class TrigonometrischerOperator(Enum):
     COS = 1
     SIN = 2
 
+
 def dx(f, val):
     return abs(0-f(val))
+
 
 def newton_verfahren(f, fd, val, acc):
     delta = dx(f, val)
@@ -43,7 +45,8 @@ def superscript_of(i: int) -> str:
     val = i
     to_return = ""
     while True:
-        if val == 0: break
+        if val == 0:
+            break
         exponent = val % 10
         if exponent == 0:
             to_return = chr(0x2070) + to_return
@@ -69,6 +72,7 @@ def superscript_of(i: int) -> str:
             raise ValueError("exponent not right value", exponent)
         val = np.floor(val / 10)
     return str(to_return)
+
 
 def subscript_of(i: int) -> str:
     val = i
@@ -98,10 +102,12 @@ def subscript_of(i: int) -> str:
         else:
             raise ValueError("exponent not right value", exponent)
         val = np.floor(val / 10)
-        if val == 0: break
+        if val == 0:
+            break
     return str(to_return)
 
-def round(x, prec):
+
+def fun_round(x, prec):
     a = np.abs(x * 10 ** prec)
     b = np.floor(a) + np.floor(2 * (a % 1))
     c = np.sign(x) * b / 10 ** prec
@@ -123,6 +129,7 @@ class Function:
 
     def calc_original(self, x):
         return self.term.calc_original(x)
+
     def calc_deriv1(self, x):
         return self.term.calc_deriv1(x)
 
@@ -135,14 +142,14 @@ class Function:
     def calc_aufleitung(self, x):
         return self.term.calc_aufleitung(x)
 
-    def calc_for_range(self, fun_type: FunctionDerivative, min, max, inc):
-        return self.term.calc_for_range(fun_type, min, max, inc)
+    def calc_for_range(self, fun_type: FunctionDerivative, min__, max__, inc):
+        return self.term.calc_for_range(fun_type, min__, max__, inc)
 
     def arr_calc(self, x_arr, func_type: FunctionDerivative):
         return self.term.arr_calc(x_arr, func_type)
 
-    def calc_nullstellen(self, funcDer: FunctionDerivative, min, max) -> []:
-        if funcDer == FunctionDerivative.DERIVATIVE_3:
+    def calc_nullstellen(self, func_der: FunctionDerivative, min__, max__) -> []:
+        if func_der == FunctionDerivative.DERIVATIVE_3:
             raise ValueError("nullstellen von derivative 3 sollten nicht berechnet werden")
         return_arr_length = -1
         if isinstance(self.term, GanzrationaleTerm):
@@ -150,33 +157,32 @@ class Function:
         if isinstance(self.term, SchnittpunktTerm):
             return_arr_length = 2
             if np.sign(self.term.original[0]) == np.sign(self.term.original[2]) \
-                    and funcDer == FunctionDerivative.ORIGINAL:
+                    and func_der == FunctionDerivative.ORIGINAL:
                 return None
         if isinstance(self.term, ExponentielerTerm):
             raise ValueError("ExponentieleFunktionen haben keine Nullstellen")
         if isinstance(self.term, TrigonomischerTerm):
-            to_use_arr = []
             arr_to_return = []
             w = 2 * np.pi / self.term.original[2]
             val = 0
-            i = int(min)
-            while val <= max:
+            i = int(min__)
+            while val <= max__:
                 if self.term.trigOp == TrigonometrischerOperator.SIN:
-                    if funcDer == FunctionDerivative.ORIGINAL:
+                    if func_der == FunctionDerivative.ORIGINAL:
                         val = (i * np.pi - self.term.original[1]) / w
-                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                    elif func_der == FunctionDerivative.DERIVATIVE_1:
                         val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
-                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                    elif func_der == FunctionDerivative.DERIVATIVE_2:
                         val = (i * np.pi - self.term.original[1]) / w
                 elif self.term.trigOp == TrigonometrischerOperator.COS:
-                    if funcDer == FunctionDerivative.ORIGINAL:
+                    if func_der == FunctionDerivative.ORIGINAL:
                         val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
-                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                    elif func_der == FunctionDerivative.DERIVATIVE_1:
                         val = (i * np.pi - self.term.original[1]) / w
-                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                    elif func_der == FunctionDerivative.DERIVATIVE_2:
                         val = ((np.pi / 2) + i * np.pi - self.term.original[1]) / w
-                if min < val < max:
-                    val = round(val, 3)
+                if min__ < val < max__:
+                    val = fun_round(val, 3)
                     arr_to_return.append((val, 0))
                 i += 1
             return arr_to_return
@@ -186,22 +192,22 @@ class Function:
             return [(-1 * self.term.original[0] / self.term.original[1], 0)]
         else:
             arr_to_return = []
-            for x in range(int(min), int(max)):
+            for x in range(int(min__), int(max__)):
                 val = float(x)
                 if val == 0:
                     continue
                 try:
-                    if funcDer == FunctionDerivative.ORIGINAL:
+                    if func_der == FunctionDerivative.ORIGINAL:
                         val = newton_verfahren(self.calc_original, self.calc_deriv1, val, 0.001)
-                    elif funcDer == FunctionDerivative.DERIVATIVE_1:
+                    elif func_der == FunctionDerivative.DERIVATIVE_1:
                         val = newton_verfahren(self.calc_deriv1, self.calc_deriv2, val, 0.001)
-                    elif funcDer == FunctionDerivative.DERIVATIVE_2:
+                    elif func_der == FunctionDerivative.DERIVATIVE_2:
                         val = newton_verfahren(self.calc_deriv2, self.calc_deriv3, val, 0.001)
                 except ZeroDivisionError:
                     continue
                 if isinstance(val, types.NoneType):
                     continue
-                val = round(val, 3)
+                val = fun_round(val, 3)
                 if (val, 0) not in arr_to_return:
                     if len(arr_to_return) == 0:
                         arr_to_return.append((val, 0))
@@ -213,11 +219,9 @@ class Function:
                 raise ValueError("Dickhead")
             elif return_arr_length < len(arr_to_return):
                 return None
-        #elif return_arr_length > len(arr_to_return):
-            #arr_to_return += [None for i in range(return_arr_length - len(arr_to_return))]
         return arr_to_return
 
-    def calc_extrempunkte(self, min, max):
+    def calc_extrempunkte(self, min__, max__):
         if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 3:
             raise ValueError("term ist linear und hat keine Extrempunkte")
         if isinstance(self.term, ExponentielerTerm):
@@ -225,27 +229,27 @@ class Function:
         if isinstance(self.term.deriv1, types.NoneType):
             raise ValueError("keine Ableitung")
 
-        ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min, max)
+        ableitung1_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_1, min__, max__)
         extremwerte = [nullstelle[0] for nullstelle in ableitung1_nullstellen]
         extremstellen_y = self.arr_calc(extremwerte, FunctionDerivative.ORIGINAL)
         extremstellen = []
         for i in range(len(extremstellen_y)):
-            extremstellen.append((round(extremwerte[i], 3), round(extremstellen_y[i], 3)))
+            extremstellen.append((fun_round(extremwerte[i], 3), fun_round(extremstellen_y[i], 3)))
         return extremstellen
 
-    def calc_wendepunkte(self, min, max):
+    def calc_wendepunkte(self, min_, max_):
         if isinstance(self.term, GanzrationaleTerm) and len(self.term.original) < 3:
             raise ValueError("term ist unterdem 3. Grad und hat somit keine Wendepunkte")
         if isinstance(self.term, ExponentielerTerm):
             raise ValueError("ExponentieleFunktionen haben keine Wendepunkte")
         if self.calc_deriv3(1) == 0:
             raise ValueError("")
-        ableitung2_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_2, min, max)
+        ableitung2_nullstellen = self.calc_nullstellen(FunctionDerivative.DERIVATIVE_2, min_, max_)
         wendepunktwerte = [nullstelle[0] for nullstelle in ableitung2_nullstellen]
         wendepunkt_y = self.arr_calc(wendepunktwerte, FunctionDerivative.ORIGINAL)
         wendepunkte = []
         for i in range(len(wendepunkt_y)):
-            wendepunkte.append((round(wendepunktwerte[i], 3), round(wendepunkt_y[i], 3)))
+            wendepunkte.append((fun_round(wendepunktwerte[i], 3), fun_round(wendepunkt_y[i], 3)))
         return wendepunkte
 
     def calc_integral(self, lim1, lim2):
@@ -256,15 +260,13 @@ class Function:
             if lim1 in nullwerte or lim2 in nullwerte or len(nullwerte) == 0:
                 return abs(self.calc_aufleitung(lim1) - self.calc_aufleitung(lim2))
             nullwerte.sort()
-            min = lim1
+            min_ = lim1
             for i in range(len(nullstellen)):
-                integral += self.calc_integral(min, nullwerte[i])
-                min = nullwerte[i]
-            integral += self.calc_integral(min, lim2)
+                integral += self.calc_integral(min_, nullwerte[i])
+                min_ = nullwerte[i]
+            integral += self.calc_integral(min_, lim2)
             return integral
         return abs(self.calc_aufleitung(lim1) - self.calc_aufleitung(lim2))
-
-
 
     def deriv1_as_str(self):
         return self.term.deriv1_as_str()
@@ -277,9 +279,6 @@ class Function:
 
     def __str__(self):
         return str(self.term)
-
-
-
 
 
 class GanzrationaleTerm:
@@ -297,15 +296,18 @@ class GanzrationaleTerm:
             self.aufleitung.append(self.original[i] / (i+1))
 
         for i in range(len(self.original)):
-            if i == len(self.original)-1: continue
+            if i == len(self.original)-1:
+                continue
             self.deriv1.append(float(i+1) * self.original[i+1])
 
         for i in range(len(self.deriv1)):
-            if i == len(self.deriv1)-1: continue
+            if i == len(self.deriv1)-1:
+                continue
             self.deriv2.append(float(i+1) * self.deriv1[i+1])
 
         for i in range(len(self.deriv2)):
-            if i == len(self.deriv2)-1: continue
+            if i == len(self.deriv2)-1:
+                continue
             self.deriv3.append(float(i+1) * self.deriv2[i+1])
 
     def calc_original(self, x):
@@ -338,17 +340,17 @@ class GanzrationaleTerm:
             to_return = self.aufleitung[i] * x ** float(i)
         return to_return
 
-    def calc_for_range(self, deriv_type: FunctionDerivative, min, max, inc):
+    def calc_for_range(self, deriv_type: FunctionDerivative, min_, max_, inc):
         '''
         gibt ergebnisse als array zurück
         :param: fun: calc funktion von classe Funktion
-         min: untere grenze\n
-         max: obere grenze\n
+         min_: untere grenze\n
+         max_: obere grenze\n
          inc: schritt größe\n
         :return: array der ergebnisse
         '''
         to_return = []
-        for x in range(min, max, inc):
+        for x in range(min_, max_, inc):
             if deriv_type == FunctionDerivative.ORIGINAL:
                 to_return.append(self.calc_original(x))
             elif deriv_type == FunctionDerivative.DERIVATIVE_1:
@@ -377,102 +379,104 @@ class GanzrationaleTerm:
         return to_return
 
     def deriv1_as_str(self):
-        toReturn = ""
+        to_return = ""
         for i in range(len(self.deriv1) - 1, -1, -1):
             if i == 0:
                 if len(self.deriv1) == 1:
-                    toReturn += f"{self.deriv1[i]}"
+                    to_return += f"{self.deriv1[i]}"
                 elif self.deriv1[i] < 0:
-                    toReturn += f"-{abs(self.deriv1[i])}"
+                    to_return += f"-{abs(self.deriv1[i])}"
                 else:
-                    toReturn += f"+{self.deriv1[i]}"
+                    to_return += f"+{self.deriv1[i]}"
             elif i == 1:
                 if len(self.deriv1) - 1 == i or self.deriv1[i] < 0:
-                    toReturn += f"{self.deriv1[i]}x"
+                    to_return += f"{self.deriv1[i]}x"
                 else:
-                    toReturn += f"+{self.deriv1[i]}x"
+                    to_return += f"+{self.deriv1[i]}x"
             elif len(self.deriv1) - 1 == i:
-                toReturn += f"{self.deriv1[i]}x{superscript_of(i)}"
+                to_return += f"{self.deriv1[i]}x{superscript_of(i)}"
             elif self.deriv1[i] < 0:
-                toReturn += f"-{abs(self.deriv1[i])}x{superscript_of(i)}"
+                to_return += f"-{abs(self.deriv1[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv1[i]}x{superscript_of(i)}"
-        if toReturn == "":
-            toReturn = "0"
-        return toReturn
+                to_return += f"+{self.deriv1[i]}x{superscript_of(i)}"
+        if to_return == "":
+            to_return = "0"
+        return to_return
+
     def deriv2_as_str(self):
-        toReturn = ""
+        to_return = ""
         for i in range(len(self.deriv2) - 1, -1, -1):
             if i == 0:
                 if len(self.deriv2) == 1:
-                    toReturn += f"{self.deriv2[i]}"
+                    to_return += f"{self.deriv2[i]}"
                 elif self.deriv2[i] < 0:
-                    toReturn += f"-{abs(self.deriv2[i])}"
+                    to_return += f"-{abs(self.deriv2[i])}"
                 else:
-                    toReturn += f"+{self.deriv2[i]}"
+                    to_return += f"+{self.deriv2[i]}"
             elif i == 1:
                 if len(self.deriv2) - 1 == i or self.deriv2[i] < 0:
-                    toReturn += f"{self.deriv2[i]}x"
+                    to_return += f"{self.deriv2[i]}x"
                 else:
-                    toReturn += f"+{self.deriv2[i]}x"
+                    to_return += f"+{self.deriv2[i]}x"
             elif len(self.deriv2) - 1 == i:
-                toReturn += f"{self.deriv2[i]}x{superscript_of(i)}"
+                to_return += f"{self.deriv2[i]}x{superscript_of(i)}"
             elif self.deriv2[i] < 0:
-                toReturn += f"-{abs(self.deriv2[i])}x{superscript_of(i)}"
+                to_return += f"-{abs(self.deriv2[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv2[i]}x{superscript_of(i)}"
-        if toReturn == "":
-            toReturn = "0"
-        return toReturn
+                to_return += f"+{self.deriv2[i]}x{superscript_of(i)}"
+        if to_return == "":
+            to_return = "0"
+        return to_return
+
     def deriv3_as_str(self):
-        toReturn = ""
+        to_return = ""
         for i in range(len(self.deriv3) - 1, -1, -1):
             if i == 0:
                 if len(self.deriv3) == 1:
-                    toReturn += f"{self.deriv3[i]}"
+                    to_return += f"{self.deriv3[i]}"
                 elif self.deriv3[i] < 0:
-                    toReturn += f"-{abs(self.deriv3[i])}"
+                    to_return += f"-{abs(self.deriv3[i])}"
                 else:
-                    toReturn += f"+{self.deriv3[i]}"
+                    to_return += f"+{self.deriv3[i]}"
             elif i == 1:
                 if len(self.deriv3) - 1 == i or self.deriv3[i] < 0:
-                    toReturn += f"{self.deriv3[i]}x"
+                    to_return += f"{self.deriv3[i]}x"
                 else:
-                    toReturn += f"+{self.deriv3[i]}x"
+                    to_return += f"+{self.deriv3[i]}x"
             elif len(self.deriv3) - 1 == i:
-                toReturn += f"{self.deriv3[i]}x{superscript_of(i)}"
+                to_return += f"{self.deriv3[i]}x{superscript_of(i)}"
             elif self.deriv3[i] < 0:
-                toReturn += f"-{abs(self.deriv3[i])}x{superscript_of(i)}"
+                to_return += f"-{abs(self.deriv3[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.deriv3[i]}x{superscript_of(i)}"
-        if toReturn == "":
-            toReturn = "0"
-        return toReturn
+                to_return += f"+{self.deriv3[i]}x{superscript_of(i)}"
+        if to_return == "":
+            to_return = "0"
+        return to_return
 
     def __str__(self):
-        toReturn = ""
+        to_return = ""
         for i in range(len(self.original)-1, -1, -1):
             if i == 0:
                 if len(self.original) == 1:
-                    toReturn += f"{self.original[i]}"
+                    to_return += f"{self.original[i]}"
                 if self.original[i] < 0:
-                    toReturn += f"-{abs(self.original[i])}"
+                    to_return += f"-{abs(self.original[i])}"
                 else:
-                    toReturn += f"+{self.original[i]}"
+                    to_return += f"+{self.original[i]}"
             elif i == 1:
                 if len(self.original)-1 == i or self.original[i] < 0:
-                    toReturn += f"{self.original[i]}x"
+                    to_return += f"{self.original[i]}x"
                 else:
-                    toReturn += f"+{self.original[i]}x"
+                    to_return += f"+{self.original[i]}x"
             elif len(self.original)-1 == i:
-                toReturn += f"{self.original[i]}x{superscript_of(i)}"
+                to_return += f"{self.original[i]}x{superscript_of(i)}"
             elif self.original[i] < 0:
-                toReturn += f"-{abs(self.original[i])}x{superscript_of(i)}"
+                to_return += f"-{abs(self.original[i])}x{superscript_of(i)}"
             else:
-                toReturn += f"+{self.original[i]}x{superscript_of(i)}"
-        if toReturn == "":
-            toReturn = "0"
-        return toReturn
+                to_return += f"+{self.original[i]}x{superscript_of(i)}"
+        if to_return == "":
+            to_return = "0"
+        return to_return
 
 
 class SchnittpunktTerm:
@@ -485,7 +489,6 @@ class SchnittpunktTerm:
         self.aufleitung = [self.original[0] / 3, self.original[1], self.original[2]]
         self.deriv1 = [self.original[0]*2, self.original[1]*self.original[0]*2]
         self.deriv2 = [self.deriv1[0]]
-
 
     def calc_original(self, x):
         return self.original[0] * (x + self.original[1])**2 + self.original[2]
@@ -517,7 +520,7 @@ class SchnittpunktTerm:
                 to_return.append(self.calc_aufleitung(x))
         return to_return
 
-    def arr_calc(self, x_arr, deriv_type : FunctionDerivative):
+    def arr_calc(self, x_arr, deriv_type: FunctionDerivative):
         to_return = []
         for x in x_arr:
             if deriv_type == FunctionDerivative.ORIGINAL:
@@ -533,12 +536,12 @@ class SchnittpunktTerm:
         return to_return
 
     def deriv1_as_str(self):
-        toReturn = f"{self.deriv1[0]}x "
+        to_return = f"{self.deriv1[0]}x "
         if self.deriv1[1] < 0:
-            toReturn += f"-{abs(self.deriv1[1])}"
+            to_return += f"-{abs(self.deriv1[1])}"
         else:
-            toReturn += f"+{self.deriv1[1]}"
-        return toReturn
+            to_return += f"+{self.deriv1[1]}"
+        return to_return
 
     def deriv2_as_str(self):
         return str(self.deriv2[0])
@@ -547,22 +550,22 @@ class SchnittpunktTerm:
         return "0"
 
     def __str__(self):
-        toReturn = f"{self.original[0]}(x "
+        to_return = f"{self.original[0]}(x "
         if self.original[1] < 0:
-            toReturn += f"-{abs(self.original[1])})²"
+            to_return += f"-{abs(self.original[1])})²"
         else:
-            toReturn += f"+{self.original[1]})²"
+            to_return += f"+{self.original[1]})²"
 
         if self.original[2] < 0:
-            toReturn += f"-{abs(self.original[2])}"
+            to_return += f"-{abs(self.original[2])}"
         else:
-            toReturn += f"+{self.original[2]}"
-        return toReturn
+            to_return += f"+{self.original[2]}"
+        return to_return
 
 
 class TrigonomischerTerm:
 
-    def __init__(self, trigop : TrigonometrischerOperator, *args):
+    def __init__(self, trigop: TrigonometrischerOperator, *args):
         self.trigOp = trigop
         self.original = []
         for val in args:
@@ -643,70 +646,71 @@ class TrigonomischerTerm:
         return to_return
 
     def deriv1_as_str(self):
-        toReturn = ""
+        to_return = ""
         if self.trigOp == TrigonometrischerOperator.SIN:
             f"{self.deriv1[0]}*"
-            toReturn += 'cos'
+            to_return += 'cos'
         elif self.trigOp == TrigonometrischerOperator.COS:
             f"{-1 * self.deriv1[0]}*"
-            toReturn += 'sin'
+            to_return += 'sin'
 
-        toReturn += f'({chr(0x03c9)}t'
+        to_return += f'({chr(0x03c9)}t'
         if self.deriv1[1] < 0:
-            toReturn += f"-{abs(self.deriv1[1])})"
+            to_return += f"-{abs(self.deriv1[1])})"
         else:
-            toReturn += f"+{self.deriv1[1]})"
-        toReturn += f' | T={self.deriv1[2]}'
-        return toReturn
+            to_return += f"+{self.deriv1[1]})"
+        to_return += f' | T={self.deriv1[2]}'
+        return to_return
 
     def deriv2_as_str(self):
-        toReturn = ""
+        to_return = ""
         if self.trigOp == TrigonometrischerOperator.SIN:
-            toReturn += f"{-1 * self.deriv2[0]}*"
-            toReturn += 'sin'
+            to_return += f"{-1 * self.deriv2[0]}*"
+            to_return += 'sin'
         elif self.trigOp == TrigonometrischerOperator.COS:
-            toReturn += f"{-1 * self.deriv2[0]}"
-            toReturn += 'cos'
+            to_return += f"{-1 * self.deriv2[0]}"
+            to_return += 'cos'
 
-        toReturn += f'({chr(0x03c9)}t'
+        to_return += f'({chr(0x03c9)}t'
         if self.deriv2[1] < 0:
-            toReturn += f"-{abs(self.deriv2[1])})"
+            to_return += f"-{abs(self.deriv2[1])})"
         else:
-            toReturn += f"+{self.deriv2[1]})"
-        toReturn += f' | T={self.deriv2[2]}'
-        return toReturn
+            to_return += f"+{self.deriv2[1]})"
+        to_return += f' | T={self.deriv2[2]}'
+        return to_return
 
     def deriv3_as_str(self):
-        toReturn = ""
+        to_return = ""
         if self.trigOp == TrigonometrischerOperator.SIN:
-            toReturn += f"{-1 * self.deriv3[0]}*"
-            toReturn += 'cos'
+            to_return += f"{-1 * self.deriv3[0]}*"
+            to_return += 'cos'
         elif self.trigOp == TrigonometrischerOperator.COS:
-            toReturn += f"{self.deriv3[0]}"
-            toReturn += 'sin'
+            to_return += f"{self.deriv3[0]}"
+            to_return += 'sin'
 
-        toReturn += f'({chr(0x03c9)}t'
+        to_return += f'({chr(0x03c9)}t'
         if self.deriv3[1] < 0:
-            toReturn += f"-{abs(self.deriv3[1])})"
+            to_return += f"-{abs(self.deriv3[1])})"
         else:
-            toReturn += f"+{self.deriv3[1]})"
-        toReturn += f' | T={self.deriv3[2]}'
-        return toReturn
+            to_return += f"+{self.deriv3[1]})"
+        to_return += f' | T={self.deriv3[2]}'
+        return to_return
 
     def __str__(self):
-        toReturn = f"{self.original[0]}*"
+        to_return = f"{self.original[0]}*"
         if self.trigOp == TrigonometrischerOperator.SIN:
-            toReturn += 'sin'
+            to_return += 'sin'
         elif self.trigOp == TrigonometrischerOperator.COS:
-            toReturn += 'cos'
+            to_return += 'cos'
 
-        toReturn += f'({chr(0x03c9)}t'
+        to_return += f'({chr(0x03c9)}t'
         if self.original[1] < 0:
-            toReturn += f"-{abs(self.original[1])})"
+            to_return += f"-{abs(self.original[1])})"
         else:
-            toReturn += f"+{self.original[1]})"
-        toReturn += f' | T={self.original[2]}'
-        return toReturn
+            to_return += f"+{self.original[1]})"
+        to_return += f' | T={self.original[2]}'
+        return to_return
+
 
 class ExponentielerTerm:
 
@@ -718,7 +722,7 @@ class ExponentielerTerm:
         self.deriv3 = self.original.copy()
 
     def calc_original(self, x):
-        return self.original[0]  ** x
+        return self.original[0] ** x
 
     def calc_deriv1(self, x):
         return None

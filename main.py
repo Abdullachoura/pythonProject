@@ -2,7 +2,7 @@ import loginWindow
 import database
 import graphWindow
 
-database.databaseStartup()
+database.database_startup()
 loginWin = loginWindow.LoginWindow()
 if loginWin.logged_in:
     graphWindow.GraphWindow()

@@ -525,7 +525,7 @@ class GraphWindow:
                         f"Integral von {self.selected_function} "
                         f"| lim{fun.subscript_of(1)}={lim1_str} "
                         f"| lim{fun.subscript_of(2)}={lim2_str} "
-                        f" ist {fun.round(integral, 3)}LE{fun.superscript_of(2)}")
+                        f" ist {fun.fun_round(integral, 3)}LE{fun.superscript_of(2)}")
 
 
     def open_integral_calc(self):
