@@ -1,9 +1,7 @@
 import time
-import tkinter
 import tkinter as tk
 import tkinter.messagebox as msgbox
 from tkinter import ttk
-from tkinter.font import Font
 
 from function import Function
 from function import TermType
@@ -13,10 +11,10 @@ from function import TrigonometrischerOperator as TriOp
 
 class FunctionEntry:
 
-    entry_arr : []
-    func : Function
+    entry_arr: []
+    func: Function
 
-    def __init__(self, term_type, list_arg=[], grad=0):
+    def __init__(self, term_type, list_arg, grad=0):
         self.root = tk.Toplevel()
         self.entry_arr = []
         self.termType = term_type
@@ -28,12 +26,12 @@ class FunctionEntry:
         self.button.pack(side='bottom')
         if term_type == TermType.GANZ_RATIONAL:
             for i in range(grad+1):
-                if i==0:
+                if i == 0:
                     text = tk.Entry(frame, width=5)
                     text.pack(side='right')
                     self.entry_arr.append(text)
                     continue
-                if i==1:
+                if i == 1:
                     label_str = 'x'
                 else:
                     label_str = f'x{superscript_of(i)}'
@@ -100,11 +98,6 @@ class FunctionEntry:
                 else:
                     self.entry_arr[i].insert(0, f"{list_arg[i]}")
 
-
-
-
-
-
     def convert_factor_entry(self, factor: str, sign_needed: bool) -> float:
         if len(factor) == 0:
             raise ValueError("Alle Eingabefelder sollten ausgefüllt sein")
@@ -122,7 +115,6 @@ class FunctionEntry:
         else:
             raise ValueError("Vorzeichen ungültig. + oder - an erster Stelle eingeben eingeben.")
 
-
     def enter_function(self):
         try:
             func_factors = []
@@ -136,14 +128,13 @@ class FunctionEntry:
                 func_factors.append(factor)
             if self.termType == TermType.TRIGONOMETRISCH:
                 if self.comboBox.get() == 'sin':
-                    trigOp = TriOp.SIN
-                elif self.comboBox.get() == 'cos':
-                    trigOp = TriOp.COS
-                self.func = Function(self.termType, trigOp, *func_factors)
+                    trig_op = TriOp.SIN
+                else:
+                    trig_op = TriOp.COS
+                self.func = Function(self.termType, trig_op, *func_factors)
             else:
                 self.func = Function(self.termType, *func_factors)
             time.sleep(0.005)
             self.root.destroy()
         except ValueError as e:
             msgbox.showinfo('Falsche Eingabe', e.args[0])
-
