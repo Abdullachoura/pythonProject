@@ -1,5 +1,4 @@
 import tkinter as tk
-import types
 import function as fun
 
 
@@ -15,7 +14,8 @@ class ScalebarFunctionChangeWindow:
         if self.func.termtype == fun.TermType.GANZ_RATIONAL:
             len_orginal = len(selected_func.term.original)
             for i in range(len_orginal):
-                scaleframe = ScalebarFrame(root, f"{chr(ord('a') + len_orginal - 1 - i)}", selected_func, i, self.update_funktion)
+                scaleframe = ScalebarFrame(root, f"{chr(ord('a') + len_orginal - 1 - i)}", selected_func,
+                                           i, self.update_funktion)
                 scaleframe.pack(side='bottom')
         elif self.func.termtype == fun.TermType.TRIGONOMETRISCH:
             scaleframe = ScalebarFrame(root, f"a", selected_func, 0, self.update_funktion)
@@ -32,6 +32,7 @@ class ScalebarFunctionChangeWindow:
     def update_funktion(self):
         self.label.config(text=f"{chr(ord('f') + self.func_ind)}={self.func}")
         self.update_win()
+
 
 class ScalebarFrame(tk.Frame):
 
@@ -58,28 +59,28 @@ class ScalebarFrame(tk.Frame):
         entry_min = tk.Entry(frame, width=5, textvariable=self.entry_val_min)
         entry_min.pack(side='left')
         self.scalebar = tk.Scale(frame, from_=-2 * abs(self.scale_val.get()), to=2 * abs(self.scale_val.get()),
-                            variable=self.scale_val, orient=tk.HORIZONTAL)
+                                 variable=self.scale_val, orient=tk.HORIZONTAL)
         self.scalebar.pack(side='left')
         entry_max = tk.Entry(frame, width=5, textvariable=self.entry_val_max)
         entry_max.pack(side='left')
         self.entry_val_max.trace_add('write',
-                                             lambda var, ind, y: self.change_max_val())
+                                     lambda var, ind, y: self.change_max_val())
         self.entry_val_min.trace_add('write',
-                                             lambda var, ind, y: self.change_min_val())
+                                     lambda var, ind, y: self.change_min_val())
         self.scale_val.trace_add("write", lambda var, ind, y: self.change_factor(index))
 
     def change_min_val(self):
         try:
             fromval = float(self.entry_val_min.get())
             self.scalebar.config(from_=fromval)
-        except:
+        except ValueError as ve:
             pass
 
     def change_max_val(self):
         try:
             toval = float(self.entry_val_max.get())
             self.scalebar.config(to=toval)
-        except:
+        except ValueError as ve:
             pass
 
     def change_factor(self, index):
